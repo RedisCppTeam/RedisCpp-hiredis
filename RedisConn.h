@@ -77,8 +77,19 @@ public:
 
 	bool lrange( const std::string &key, uint32_t start, uint32_t end, ValueList& valueList );
 
+	/////////////////////////hash////////////////
+	bool hget( const std::string& key , const std::string& filed , std::string& value );
+
+	bool hset( const std::string& key , const std::string& filed , const std::string& value ,uint32_t& retval );
+
+	bool hdel( const std::string& key , const std::string& filed , uint32_t& retval );
+
+	bool hgetall( const std::string& key , ValueList& valueList );
+
 protected:
 
+
+	bool getArryToList( redisReply* reply , ValueList& valueList );
 
 	bool _getError( const redisContext* redCtx );
 
