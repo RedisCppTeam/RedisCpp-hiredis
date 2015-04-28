@@ -40,8 +40,10 @@ public:
 	RedisPool( );
 	virtual ~RedisPool( );
 
-	void init( const std::string& host, uint16_t port, std::string& pass,
+	bool init( const std::string& host, uint16_t port, std::string& pass,
 						uint32_t timeout, uint16_t maxSize,uint16_t minSize  );
+
+	bool connect();
 
 
 private:
@@ -53,6 +55,9 @@ private:
 	uint16_t _minSize;			///< min pool size
 	uint16_t _maxSize;			///< max pool size
 	std::list<RedisConnBuffer> _conns;	///< all connection.
+
+	std::string _errStr;				///< Describe the reason for error..
+	static const char* _errDes[2];	///< describe error
 };
 
 } /* namespace RedisCpp */
