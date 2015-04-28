@@ -1,0 +1,350 @@
+/**
+ * Copyright (c) 2015, 爱wifi（版权声明）
+ *
+ * @file	RedisConn.cpp		
+ * @brief 此文件的简单描述。(必填字段)
+ *
+ * 此文件的详细功能描述。(可选字段)
+ *
+ * @author: 		yuhaiyang
+ * @date: 		2015年4月27日
+ *
+ * 修订说明:初始版本
+ */
+
+#include "RedisConn.h"
+#include <string.h>
+
+
+namespace RedisCpp
+{
+///< 错误描述。
+const char* RedisConn::_errDes[2] = {"NULL return , fatal error!", "Has no connection to the redis server." };
+
+RedisConn::RedisConn( )
+{
+	_redCtx = NULL;
+	_host.clear( );
+	_password.clear( );
+	_port = 0;
+	_timeout = 0;
+	_connected = false;
+	_errStr.clear( );
+}
+
+void RedisConn::init( const std::string &host , const uint16_t port , const std::string& password ,
+                const uint32_t timeout )
+{
+	_host = host;
+	_port = port;
+	_password = password;
+	_timeout = timeout;
+}
+
+
+bool RedisConn::_getError( const redisReply* reply )
+{
+	_errStr = "";
+	if( reply == NULL )
+	{
+		_errStr = _errDes[0];
+		return true;
+	}
+	///< have error
+	if( reply->type == REDIS_REPLY_ERROR )
+	{
+		_errStr = reply->str;
+		return true;
+	}else
+	{
+		return false;
+	}
+}
+
+bool RedisConn::_getError( const redisContext* redCtx )
+{
+	_errStr = "";
+	if( redCtx == NULL )
+	{
+		_errStr = _errDes[0];
+		return true;
+	}
+	if ( redCtx->err != 0 )
+	{
+		_errStr = redCtx->errstr;
+		return true;
+	}else
+	{
+		return false;
+	}
+}
+
+
+bool RedisConn::auth( const std::string& password )
+{
+	if( !_connected )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	bool ret = false;
+	_password = password;
+	redisReply *reply = static_cast<redisReply *>( redisCommand( _redCtx, "AUTH %s",
+	                _password.c_str( ) ) );
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}
+	else
+	{
+		ret = true;
+	}
+
+	if( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}
+	return ret;
+}
+
+bool RedisConn::connect(void)
+{
+	if( _connected )
+	{
+		disConnect();
+	}
+
+	struct timeval timeoutVal;
+	timeoutVal.tv_sec = _timeout;
+	timeoutVal.tv_usec = 0;
+
+	_redCtx = redisConnectWithTimeout( _host.c_str( ), _port, timeoutVal );
+	if ( _getError( _redCtx ) )
+	{
+		if ( NULL != _redCtx )
+		{
+			redisFree( _redCtx );
+			_redCtx = NULL;
+		}
+		return false;
+	}
+
+	_connected = true;
+
+	///< if connection  need password
+	if ( _password == "" )
+	{
+		return true;
+	}
+	else
+	{
+		return ( auth( _password ) );
+	}
+}
+
+void RedisConn::disConnect( )
+{
+	if ( _connected && NULL != _redCtx )
+	{
+		redisFree( _redCtx );
+		_redCtx = NULL;
+	}
+	_connected = false;
+}
+
+bool RedisConn::connect( const std::string &host ,const uint16_t port ,
+							const std::string& password , const uint32_t timeout )
+{
+	///< Init attribute.
+	init( host, port, password, timeout );
+
+	return ( connect() );
+}
+
+bool RedisConn::ping( )
+{
+	if( !_connected || !_redCtx )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	redisReply *reply = static_cast<redisReply *>( redisCommand( _redCtx, "PING" ) );
+	bool ret = false;
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}else
+	{
+		ret = true;
+	}
+
+	if ( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}
+
+	return ret;
+}
+
+bool RedisConn::reconnect( )
+{
+	return (connect() );
+}
+
+
+const std::string RedisConn::getErrorStr( ) const
+{
+	return _errStr;
+}
+
+
+redisReply*  RedisConn::redisCmd( const char *format, ... )
+{
+	va_list ap;
+	va_start(ap, format);
+	redisReply* reply = static_cast<redisReply *>( redisvCommand(_redCtx, format, ap) );
+	va_end( ap );
+	return reply;
+}
+
+
+RedisConn::~RedisConn( )
+{
+	disConnect();
+}
+
+////////////////////////////////// list 类的方法 ////////////////////////////////////////
+
+bool RedisConn::lpush(const std::string& key, const std::string& value, uint64_t& retval )
+{
+	if( !_connected || !_redCtx )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	retval = 0;
+	bool ret = false;
+
+	redisReply *reply = redisCmd( "LPUSH %s %s", key.c_str(), value.c_str() );
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}else
+	{
+		retval = reply->integer;
+		ret = true;
+	}
+
+	if ( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}
+
+	return ret;
+}
+
+
+bool RedisConn::lpop(const std::string& key, std::string& value )
+{
+	if( !_connected || !_redCtx )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	bool ret = false;
+	redisReply *reply = redisCmd( "LPOP %s", key.c_str() );
+
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}else
+	{
+		value = reply->str;
+		ret = true;
+	}
+
+	if ( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}else
+	{
+
+	}
+
+	return ret;
+}
+
+bool getArry( redisReply* reply ,ValueList& valueList )
+{
+	if( NULL == reply )
+	{
+		return false;
+	}
+
+	std::size_t num = reply->elements;
+
+	for( std::size_t i = 0; i < num ; i++ )
+	{
+		valueList.push_front( reply->element[i]->str );
+	}
+
+//	ValueList::iterator it = valueList.begin();
+//
+//	for( ; it != valueList.end(); it++ )
+//	{
+//		std::cout << "valueList: "<< *it << std::endl;
+//	}
+	return true;
+}
+
+
+bool RedisConn::lrange( const std::string &key, uint32_t start, uint32_t end, ValueList& valueList )
+{
+	if( !_connected || !_redCtx )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	bool ret = false;
+	redisReply *reply = redisCmd( "LRANGE %s %d %d", key.c_str(),start, end );
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}else
+	{
+		if( REDIS_REPLY_ARRAY == reply->type )
+		{
+			getArry( reply, valueList );
+		}
+		ret = true;
+	}
+
+
+	if ( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}else
+	{
+
+	}
+
+	return ret;
+}
+
+
+
+} /* namespace RedisCpp */
+
+
+
+
