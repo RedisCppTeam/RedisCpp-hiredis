@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <map>
 
 
 #define DEBUGOUT( attr, value ) std::cout << attr << value << std::endl;
@@ -28,6 +29,7 @@ namespace RedisCpp
 {
 
 typedef std::list<std::string> ValueList;
+typedef std::map<std::string,std::string> ValueMap;
 
 /*
  * @brief 此类基于 hiredis 用于保持与 redis-server 的链接。
@@ -84,12 +86,13 @@ public:
 
 	bool hdel( const std::string& key , const std::string& filed , uint32_t& retval );
 
-	bool hgetall( const std::string& key , ValueList& valueList );
+	bool hgetall( const std::string& key , ValueMap& valueMap);
 
 protected:
 
-
 	bool getArryToList( redisReply* reply , ValueList& valueList );
+
+	bool getArryToMap( redisReply* reply , ValueMap& valueMap );
 
 	bool _getError( const redisContext* redCtx );
 

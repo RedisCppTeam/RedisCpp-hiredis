@@ -14,7 +14,7 @@
 
 #include "RedisConn.h"
 #include <string.h>
-
+using namespace std;
 namespace RedisCpp
 {
 ///< 错误描述。
@@ -304,6 +304,23 @@ bool RedisConn::getArryToList( redisReply* reply , ValueList& valueList )
 	return true;
 }
 
+bool RedisConn::getArryToMap( redisReply* reply , ValueMap& valueMap )
+{
+	if ( NULL == reply )
+	{
+		return false;
+	}
+
+	std::size_t num = reply->elements;
+
+	for ( std::size_t i = 0 ; i < num ; i+=2 )
+	{
+		valueMap.insert(pair<string, string>(reply->element[i]->str,reply->element[i+1]->str));
+	}
+
+	return true;
+}
+
 bool RedisConn::lrange( const std::string &key , uint32_t start , uint32_t end ,
 		ValueList& valueList )
 {
@@ -324,7 +341,7 @@ bool RedisConn::lrange( const std::string &key , uint32_t start , uint32_t end ,
 	{
 		if ( REDIS_REPLY_ARRAY == reply->type )
 		{
-			getArry(reply, valueList);
+			getArryToList(reply, valueList);
 		}
 		ret = true;
 	}
@@ -444,7 +461,7 @@ bool RedisConn::hdel( const std::string& key , const std::string& filed , uint32
 	return ret;
 }
 
-bool RedisConn::hgetall( const std::string& key , ValueList& valueList )
+bool RedisConn::hgetall( const std::string& key , ValueMap& valueMap )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -463,7 +480,7 @@ bool RedisConn::hgetall( const std::string& key , ValueList& valueList )
 	{
 		if ( REDIS_REPLY_ARRAY == reply->type )
 		{
-			getArry(reply, valueList);
+			getArryToMap(reply, valueMap);
 		}
 		ret = true;
 	}
