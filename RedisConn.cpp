@@ -281,7 +281,7 @@ bool RedisConn::lpop( const std::string& key , std::string& value )
 	return ret;
 }
 
-bool RedisConn::getArryToList( redisReply* reply , ValueList& valueList )
+bool RedisConn::_getArryToList( redisReply* reply , ValueList& valueList )
 {
 	if ( NULL == reply )
 	{
@@ -304,7 +304,7 @@ bool RedisConn::getArryToList( redisReply* reply , ValueList& valueList )
 	return true;
 }
 
-bool RedisConn::lrange( const std::string &key , uint32_t start , uint32_t end ,
+bool RedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
 		ValueList& valueList )
 {
 	if ( !_connected || !_redCtx )
@@ -324,7 +324,7 @@ bool RedisConn::lrange( const std::string &key , uint32_t start , uint32_t end ,
 	{
 		if ( REDIS_REPLY_ARRAY == reply->type )
 		{
-			getArry(reply, valueList);
+			_getArryToList(reply, valueList);
 		}
 		ret = true;
 	}
@@ -463,7 +463,7 @@ bool RedisConn::hgetall( const std::string& key , ValueList& valueList )
 	{
 		if ( REDIS_REPLY_ARRAY == reply->type )
 		{
-			getArry(reply, valueList);
+			///< getArryToMap();
 		}
 		ret = true;
 	}

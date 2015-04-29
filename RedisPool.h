@@ -16,8 +16,12 @@
 
 #include <stdint.h>
 #include <iostream>
-#include "RedisConn.h"
 #include <list>
+
+#include <Poco/Mutex.h>
+#include <Poco/AutoPtr.h>
+
+#include "RedisConn.h"
 
 namespace RedisCpp
 {
@@ -32,19 +36,30 @@ class RedisPool
 public:
 	typedef struct
 	{
-		RedisConn* conn;	///< a connection
-		bool idel;		///< if idel
+		RedisConn* pconn;	///< a connection
+		bool idle;			///< if idel
 	} RedisConnBuffer;
 
 
 	RedisPool( );
 	virtual ~RedisPool( );
 
-	bool init( const std::string& host, uint16_t port, std::string& pass,
-						uint32_t timeout, uint16_t maxSize,uint16_t minSize  );
+	bool init( const std::string& host, uint16_t port, const std::string& pass,
+						uint32_t timeout=0, uint16_t minSize=5,uint16_t  maxSize=10 );
 
 	bool connect();
 
+	void disconnect();
+
+	bool auth( const std::string& password );
+
+	RedisConn* getRedisConn( );
+
+	bool putBack( const RedisConn* pconn );
+
+	void onJanitorTimer( );
+
+protected:
 
 private:
 	std::string _host;         		///< redis host
@@ -55,9 +70,11 @@ private:
 	uint16_t _minSize;			///< min pool size
 	uint16_t _maxSize;			///< max pool size
 	std::list<RedisConnBuffer> _conns;	///< all connection.
-
+	bool _connected;				///< Whether it is connected
+	
 	std::string _errStr;				///< Describe the reason for error..
 	static const char* _errDes[2];	///< describe error
+	Poco::Mutex _mutex;			///< lock
 };
 
 } /* namespace RedisCpp */

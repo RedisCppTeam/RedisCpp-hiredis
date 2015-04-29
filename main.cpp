@@ -8,6 +8,9 @@
 #include "RedisConn.h"
 #include <iostream>
 #include <unistd.h>
+#include <pthread.h>
+
+#include "RedisPool.h"
 
 //redisReply，我们需要通过判断它的type字段来知道返回了具体什么样的内容：
 //REDIS_REPLY_STATUS 表示状态，内容通过str字段查看，字符串长度是len字段
@@ -84,29 +87,88 @@
 //}
 //
 
+//int main( )
+//{
+//	RedisCpp::RedisConn con;
+//	if ( !con.connect( "192.168.5.102", 6379, "521110", 5 ) )
+//	{
+//		std::cout << "connect error: " << con.getErrorStr( ) << std::endl;
+//	}
+//	RedisCpp::ValueList valueList;
+//	if ( !con.lrange( "newTest", 0 , -1, valueList ) )
+//	{
+//		std::cout << "lrange error: " << con.getErrorStr( ) << std::endl;
+//	}else
+//	{
+//		std::cout << "lrange ok: " << std::endl;
+//		RedisCpp::ValueList::const_iterator it = valueList.begin();
+//
+//		for( ; it != valueList.end(); it++ )
+//		{
+//			std::cout << "valueList:: "<< *it << std::endl;
+//		}
+//	}
+//}
 
+
+
+////////////////////////////////////pool test////////////////////////////////
+void* CallBack( void* arg )
+{
+	RedisCpp::RedisPool* pool = ( RedisCpp::RedisPool* )arg;
+	RedisCpp::RedisConn* conn = pool->getRedisConn();
+
+	while( !conn )
+	{
+		std::cout << "sleep" << std::endl;
+		usleep( 10 );
+		 conn = pool->getRedisConn();
+	}
+//	std::cout << "ok" << std::endl;
+	RedisCpp::ValueList valueList;
+	conn->lrange( "newTest", 0, -1, valueList );
+
+//	RedisCpp::ValueList::const_iterator it = valueList.begin( );
+//	for ( ; it != valueList.end( ) ; it++ )
+//	{
+//		std::cout << "valueList:: " << *it << std::endl;
+//	}
+
+	pool->putBack( conn );
+	return NULL;
+}
 
 int main( )
 {
-	RedisCpp::RedisConn con;
-	if ( !con.connect( "192.168.5.102", 6379, "521110", 5 ) )
+	RedisCpp::RedisPool pool;
+	pool.init( "127.0.0.1", 6379, "521110" );
+	if( !pool.connect( ) )
 	{
-		std::cout << "connect error: " << con.getErrorStr( ) << std::endl;
+		std::cout << "connect error" << std::endl;
+		return -1;
 	}
-	RedisCpp::ValueList valueList;
-	if ( !con.lrange( "newTest", 0 , -1, valueList ) )
-	{
-		std::cout << "lrange error: " << con.getErrorStr( ) << std::endl;
-	}else
-	{
-		std::cout << "lrange ok: " << std::endl;
-		RedisCpp::ValueList::const_iterator it = valueList.begin();
+//	pool.disconnect( );
 
-		for( ; it != valueList.end(); it++ )
-		{
-			std::cout << "valueList:: "<< *it << std::endl;
-		}
+	pthread_t tid[100];
+	int i = 1000000;
+	while (  i )
+	{
+//		for ( int k = 0 ; k < 10 ; k++ )
+//		{
+//			pthread_create( &tid[k], NULL, CallBack, &pool );
+//		}
+//
+//		for ( int k = 0 ; k < 10 ; k++ )
+//		{
+//			pthread_join( tid[k], NULL );
+//		}
+
+		i--;
+
+		CallBack( &pool );
+//		std::cout << "yes" << std::endl;
 	}
+	//sleep( 10 );
+	return 0;
 }
-
 

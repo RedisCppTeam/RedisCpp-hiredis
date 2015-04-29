@@ -75,9 +75,9 @@ public:
 	bool lpop(const std::string& key, std::string& value );
 
 
-	bool lrange( const std::string &key, uint32_t start, uint32_t end, ValueList& valueList );
+	bool lrange( const std::string &key, uint32_t start, int32_t end, ValueList& valueList );
 
-	/////////////////////////hash////////////////
+	//////////////////////////////   hash 的方法 //////////////////////////////////////
 	bool hget( const std::string& key , const std::string& filed , std::string& value );
 
 	bool hset( const std::string& key , const std::string& filed , const std::string& value ,uint32_t& retval );
@@ -89,7 +89,7 @@ public:
 protected:
 
 
-	bool getArryToList( redisReply* reply , ValueList& valueList );
+	bool _getArryToList( redisReply* reply , ValueList& valueList );
 
 	bool _getError( const redisContext* redCtx );
 
