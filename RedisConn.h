@@ -76,8 +76,17 @@ public:
 
 	bool lpop(const std::string& key, std::string& value );
 
-
 	bool lrange( const std::string &key, uint32_t start, uint32_t end, ValueList& valueList );
+
+	bool rpush(const std::string& key, const std::string& value, uint64_t& retval );
+
+	bool rpop(const std::string& key, std::string& value );
+
+	bool linsert(const std::string& key, const std::string& position, const std::string& pivot, const std::string value, int64_t& retval);
+
+	bool lindex(const std::string& key, int32_t index, std::string& value);
+
+	bool llen(const std::string& key, uint64_t& retval);
 
 	/////////////////////////hash////////////////
 	bool hget( const std::string& key , const std::string& filed , std::string& value );
