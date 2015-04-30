@@ -17,7 +17,7 @@
 
 namespace RedisCpp
 {
-///< 错误描述。
+// 错误描述。
 const char* RedisConn::_errDes[2] =
 { "NULL return , fatal error!", "Has no connection to the redis server." };
 
@@ -49,7 +49,7 @@ bool RedisConn::_getError( const redisReply* reply )
 		_errStr = _errDes[0];
 		return true;
 	}
-	///< have error
+	// have error
 	if ( reply->type == REDIS_REPLY_ERROR )
 	{
 		_errStr = reply->str;
@@ -133,7 +133,7 @@ bool RedisConn::connect( void )
 
 	_connected = true;
 
-	///< if connection  need password
+	// if connection  need password
 	if ( _password == "" )
 	{
 		return true;
@@ -155,9 +155,9 @@ void RedisConn::disConnect( )
 }
 
 bool RedisConn::connect( const std::string &host , const uint16_t port ,
-		const std::string& password , const uint32_t timeout )
+		const std::string& password, const uint32_t timeout )
 {
-	///< Init attribute.
+	// Init attribute.
 	init(host, port, password, timeout);
 
 	return ( connect() );

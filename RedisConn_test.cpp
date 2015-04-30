@@ -11,10 +11,25 @@
  *
  * 修订说明:初始版本
  */
+#include "RedisConn.h"
 
-int main()
+int main( )
 {
+	RedisCpp::RedisConn con;
+	if ( !con.connect( "127.0.0.1", 6379 ) )
+	{
+		std::cout << "connect error " << con.getErrorStr( ) << std::endl;
+		return 0;
+	}
 
+	std::string value;
+	if ( !con.hget( "newHash", "yuhaiyang", value ) )
+	{
+		std::cout << "hget error " << con.getErrorStr( ) << std::endl;
+	}
+
+	std::cout << "value: " << value << std::endl;
+	return 0;
 }
 
 
