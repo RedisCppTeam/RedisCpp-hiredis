@@ -31,6 +31,13 @@ namespace RedisCpp
 typedef std::list<std::string> ValueList;
 typedef std::map<std::string,std::string> ValueMap;
 
+///< 这个是插入时候是插入在指定元素之前，或者指定元素之后
+typedef enum INSERT_POS
+{
+	BEFORE,			///< 插入到指定元素之前。
+	AFTER
+} INSERT_POS;
+
 /**
  *@brief 此类基于 hiredis 用于保持与 redis-server 的链接。
  * 
@@ -152,19 +159,21 @@ public:
 
 	bool lrange( const std::string &key, uint32_t start, int32_t end, ValueList& valueList );
 
+	bool lrange( const std::string &key , uint32_t start , uint32_t end ,
+	                ValueList& valueList );
+
+	bool rpush( const std::string& key , const std::string& value , uint64_t& retval );
+
+	bool rpop( const std::string& key , std::string& value );
+
+	bool linsert( const std::string& key , INSERT_POS position ,
+	                const std::string& pivot , const std::string value , int64_t& retval );
+
+	bool lindex( const std::string& key , int32_t index , std::string& value );
+
+	bool llen( const std::string& key , uint64_t& retval );
+
 	//////////////////////////////   hash 的方法 //////////////////////////////////////
-
-	bool lrange( const std::string &key, uint32_t start, uint32_t end, ValueList& valueList );
-
-	bool rpush(const std::string& key, const std::string& value, uint64_t& retval );
-
-	bool rpop(const std::string& key, std::string& value );
-
-	bool linsert(const std::string& key, const std::string& position, const std::string& pivot, const std::string value, int64_t& retval);
-
-	bool lindex(const std::string& key, int32_t index, std::string& value);
-
-	bool llen(const std::string& key, uint64_t& retval);
 
 	bool hget( const std::string& key , const std::string& filed , std::string& value );
 
@@ -212,9 +221,19 @@ private:
 	std::string _password;         	///< redis server password
 	uint32_t _timeout;      		///< connect timeout second
 	bool _connected;			///< if connected
-	std::string _errStr;			///< Describe the reason for error..
 
-	static const char* _errDes[2];	///< describe error
+	///< error number
+	enum ERROR_NO
+	{
+		ERR_NO_ERROR,
+		ERR_NULL,
+		ERR_NO_CONNECT,
+		ERR_POSITION,
+		ERR_BOTTOM
+	};
+	const char* _errStr;		///< Describe the reason for error..
+
+	static const char* _errDes[ ERR_BOTTOM ];	///< describe error
 };
 
 } /* namespace RedisCpp */

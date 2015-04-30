@@ -13,6 +13,9 @@
  */
 #include "RedisConn.h"
 
+using RedisCpp::BEFORE;
+using RedisCpp::AFTER;
+
 int main( )
 {
 	RedisCpp::RedisConn con;
@@ -23,12 +26,19 @@ int main( )
 	}
 
 	std::string value;
-	if ( !con.hget( "newHash", "yuhaiyang", value ) )
-	{
-		std::cout << "hget error " << con.getErrorStr( ) << std::endl;
-	}
+//	if ( !con.hget( "newHash", "yuhaiyang", value ) )
+//	{
+//		std::cout << "hget error " << con.getErrorStr( ) << std::endl;
+//	}
 
-	std::cout << "value: " << value << std::endl;
+	int64_t ret = 0;
+	if( !con.linsert("testList",BEFORE, "yuhaiyang", "huangshaoliang", ret ) )
+	{
+		std::cout << "error: " << con.getErrorStr( ) << std::endl;
+	}else
+	{
+		std::cout << "value: " << value << std::endl;
+	}
 	return 0;
 }
 
