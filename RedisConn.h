@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <map>
 
 
 #define DEBUGOUT( attr, value ) std::cout << attr << value << std::endl;
@@ -28,6 +29,7 @@ namespace RedisCpp
 {
 
 typedef std::list<std::string> ValueList;
+typedef std::map<std::string,std::string> ValueMap;
 
 /*
  * @brief 此类基于 hiredis 用于保持与 redis-server 的链接。
@@ -75,21 +77,35 @@ public:
 	bool lpop(const std::string& key, std::string& value );
 
 
+
 	bool lrange( const std::string &key, uint32_t start, int32_t end, ValueList& valueList );
 
 	//////////////////////////////   hash 的方法 //////////////////////////////////////
+
+	bool lrange( const std::string &key, uint32_t start, uint32_t end, ValueList& valueList );
+
+	bool rpush(const std::string& key, const std::string& value, uint64_t& retval );
+
+	bool rpop(const std::string& key, std::string& value );
+
+	bool linsert(const std::string& key, const std::string& position, const std::string& pivot, const std::string value, int64_t& retval);
+
+	bool lindex(const std::string& key, int32_t index, std::string& value);
+
+	bool llen(const std::string& key, uint64_t& retval);
+
 	bool hget( const std::string& key , const std::string& filed , std::string& value );
 
 	bool hset( const std::string& key , const std::string& filed , const std::string& value ,uint32_t& retval );
 
 	bool hdel( const std::string& key , const std::string& filed , uint32_t& retval );
 
-	bool hgetall( const std::string& key , ValueList& valueList );
+	bool hgetall( const std::string& key , ValueMap& valueMap);
 
 protected:
-
-
 	bool _getArryToList( redisReply* reply , ValueList& valueList );
+
+	bool _getArryToMap( redisReply* reply , ValueMap& valueMap );
 
 	bool _getError( const redisContext* redCtx );
 

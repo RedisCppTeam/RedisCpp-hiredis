@@ -304,8 +304,24 @@ bool RedisConn::_getArryToList( redisReply* reply , ValueList& valueList )
 	return true;
 }
 
-bool RedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
-		ValueList& valueList )
+bool RedisConn::_getArryToMap( redisReply* reply , ValueMap& valueMap )
+{
+	if ( NULL == reply )
+	{
+		return false;
+	}
+
+	std::size_t num = reply->elements;
+
+	for ( std::size_t i = 0 ; i < num ; i+=2 )
+	{
+		valueMap.insert( std::pair<std::string, std::string>(reply->element[i]->str,reply->element[i+1]->str));
+	}
+
+	return true;
+}
+
+bool RedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,ValueList& valueList )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -341,6 +357,171 @@ bool RedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
 	return ret;
 }
 
+
+bool RedisConn::rpush(const std::string& key, const std::string& value, uint64_t& retval )
+{
+	if( !_connected || !_redCtx )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	retval = 0;
+	bool ret = false;
+
+	redisReply *reply = redisCmd( "RPUSH %s %s", key.c_str(), value.c_str() );
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}else
+	{
+		retval = reply->integer;
+		ret = true;
+	}
+
+	if ( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}
+
+	return ret;
+}
+
+
+bool RedisConn::rpop(const std::string& key, std::string& value )
+{
+	if( !_connected || !_redCtx )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	bool ret = false;
+	redisReply *reply = redisCmd( "RPOP %s", key.c_str() );
+
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}else
+	{
+		value = reply->str;
+		ret = true;
+	}
+
+	if ( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}else
+	{
+
+	}
+
+	return ret;
+}
+
+bool RedisConn::lindex(const std::string& key, int32_t index, std::string& value)
+{
+	if( !_connected || !_redCtx )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	bool ret = false;
+	redisReply *reply = redisCmd( "LINDEX %s %d", key.c_str(),index );
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}else
+	{
+		value = reply->str;
+		ret = true;
+	}
+
+	if ( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}else
+	{
+
+	}
+
+	return ret;
+}
+
+bool RedisConn::linsert(const std::string& key, const std::string& position, const std::string& pivot, const std::string value, int64_t& retval)
+{
+	if( !_connected || !_redCtx )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	bool ret = false;
+	redisReply *reply = redisCmd( "LINSERT %s %s %s %s", key.c_str(), position.c_str(), pivot.c_str(), value.c_str() );
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}else
+	{
+		if( REDIS_REPLY_INTEGER == reply->type )
+		{
+			retval = reply->integer;
+		}
+		ret = true;
+	}
+
+	if ( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}else
+	{
+
+	}
+
+	return ret;
+}
+
+bool RedisConn::llen(const std::string& key, uint64_t& retval)
+{
+	if( !_connected || !_redCtx )
+	{
+		_errStr = _errDes[1];
+		return false;
+	}
+
+	bool ret = false;
+	redisReply *reply = redisCmd( "LLEN %s", key.c_str());
+
+	if ( _getError( reply ) )
+	{
+		ret = false;
+	}else
+	{
+		if( REDIS_REPLY_INTEGER == reply->type )
+		{
+			retval = reply->integer;
+		}
+		ret = true;
+	}
+
+
+	if ( NULL != reply )
+	{
+		freeReplyObject( reply );
+	}else
+	{
+
+	}
+
+	return ret;
+}
+
+//////////////////hash方法/////////////////////////////
 bool RedisConn::hget( const std::string& key , const std::string& filed , std::string& value )
 {
 	if ( !_connected || !_redCtx )
@@ -444,7 +625,7 @@ bool RedisConn::hdel( const std::string& key , const std::string& filed , uint32
 	return ret;
 }
 
-bool RedisConn::hgetall( const std::string& key , ValueList& valueList )
+bool RedisConn::hgetall( const std::string& key , ValueMap& valueMap )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -463,7 +644,7 @@ bool RedisConn::hgetall( const std::string& key , ValueList& valueList )
 	{
 		if ( REDIS_REPLY_ARRAY == reply->type )
 		{
-			///< getArryToMap();
+			_getArryToMap(reply, valueMap);
 		}
 		ret = true;
 	}

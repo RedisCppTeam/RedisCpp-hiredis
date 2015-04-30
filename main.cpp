@@ -121,7 +121,7 @@ void* CallBack( void* arg )
 	while( !conn )
 	{
 		std::cout << "sleep" << std::endl;
-		usleep( 10 );
+		usleep( 100 );
 		 conn = pool->getRedisConn();
 	}
 //	std::cout << "ok" << std::endl;
@@ -138,6 +138,9 @@ void* CallBack( void* arg )
 	return NULL;
 }
 
+
+///< 链接池的方式。real	1m25.556s    user	0m43.774s    sys	1m47.368s  cpu 187%
+
 int main( )
 {
 	RedisCpp::RedisPool pool;
@@ -147,28 +150,73 @@ int main( )
 		std::cout << "connect error" << std::endl;
 		return -1;
 	}
-//	pool.disconnect( );
+	pthread_t tid[10];
 
-	pthread_t tid[100];
-	int i = 1000000;
-	while (  i )
+	for ( int i = 100000; i > 0; i-- )
 	{
-//		for ( int k = 0 ; k < 10 ; k++ )
-//		{
-//			pthread_create( &tid[k], NULL, CallBack, &pool );
-//		}
-//
-//		for ( int k = 0 ; k < 10 ; k++ )
-//		{
-//			pthread_join( tid[k], NULL );
-//		}
+		for ( int k = 0 ; k < 10 ; k++ )
+		{
+			pthread_create( &tid[k], NULL, CallBack, &pool );
+		}
 
-		i--;
+		for ( int k = 0 ; k < 10 ; k++ )
+		{
+			pthread_join( tid[k], NULL );
+		}
 
-		CallBack( &pool );
-//		std::cout << "yes" << std::endl;
 	}
-	//sleep( 10 );
 	return 0;
 }
+
+///< 单线程  real	0m38.178s  user	0m7.396s    sys	0m17.086s cpu 60%
+//int main()
+//{
+//	RedisCpp::RedisConn con;
+//	if( !con.connect( "127.0.0.1", 6379, "521110", 5 ) )
+//	{
+//		std::cout << "connect error " << con.getErrorStr() << std::endl;
+//		return 0;
+//	}
+//
+//	std::string value;
+//	for( int i = 1000000; i > 0; i-- )
+//	{
+//		if (  !con.hget("newHash", "yuhaiyang", value ) )
+//		{
+//			std::cout << "hget error " << con.getErrorStr() << std::endl;
+//		}
+////		std::cout << "value: " << value << std::endl;
+//	}
+//	return 0;
+//}
+
+
+
+///< test cj
+//int main( )
+//{
+//	RedisCpp::RedisPool pool;
+//	pool.init( "127.0.0.1", 6379, "521110" );
+//	if ( !pool.connect( ) )
+//	{
+//		std::cout << "connect error" << std::endl;
+//		return -1;
+//	}
+//	uint32_t ret = 0;
+//	pool.getRedisConn()->hset( "newHash", "zhouli", "nv", ret );
+//	RedisCpp::ValueMap valueMap;
+//	pool.getRedisConn()->hgetall("newHash", valueMap);
+//
+//	RedisCpp::ValueMap::const_iterator it = valueMap.begin();
+//
+//	for( ; it != valueMap.end(); it++ )
+//	{
+//		std::cout << it->first << " " << it->second << std::endl;
+//	}
+//}
+
+
+
+
+
 
