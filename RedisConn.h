@@ -150,8 +150,6 @@ public:
 
 	bool lpop(const std::string& key, std::string& value );
 
-
-
 	bool lrange( const std::string &key, uint32_t start, int32_t end, ValueList& valueList );
 
 	//////////////////////////////   hash 的方法 //////////////////////////////////////
@@ -177,8 +175,24 @@ public:
 	bool hgetall( const std::string& key , ValueMap& valueMap);
 
 protected:
+	/**
+	 *@brief  从 reply->type 为REDIS_REPLY_ARRY 类型的元素获取数据填充到　valueList 列表.
+	 *
+	 *@param [in] reply  . the data return from redis-server.
+	 *@param [out] valueList .从　reply 提取的多条数据.
+	 *@return 成功返回 true, 失败返回　false.
+	 */
 	bool _getArryToList( redisReply* reply , ValueList& valueList );
 
+	/**
+	 *@brief  从 reply->type 为REDIS_REPLY_ARRY 类型的元素获取数据填充到valueMap 列表.
+	 *
+	 *hgetall 返回数据奇数为字段名,偶数为字段数据。以　字段名=字段数据的方式存在　valueMap 里。
+	 *
+	 *@param [in] reply  . the data return from redis-server.
+	 *@param [out] valueMap .从 reply 提取的much of pair 数据存储到　valueMap.
+	 *@return 成功返回 true, 失败返回　false.
+	 */
 	bool _getArryToMap( redisReply* reply , ValueMap& valueMap );
 
 	bool _getError( const redisContext* redCtx );
