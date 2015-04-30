@@ -139,9 +139,9 @@ public:
 	/**
 	 * @brief 获取错误的原因
 	 *
-	 * ＠return 返回发生错误的原因，没有错误返回　""
+	 * ＠return 返回发生错误的原因.
 	 */
-	const std::string getErrorStr( ) const;
+	const char* getErrorStr( ) const;
 
 	/**
 	 * @brief 直接发送指令参数给　redis 服务器。
@@ -225,10 +225,12 @@ private:
 	///< error number
 	enum ERROR_NO
 	{
-		ERR_NO_ERROR,
+		ERR_NO_ERROR = 0,
 		ERR_NULL,
 		ERR_NO_CONNECT,
 		ERR_POSITION,
+		ERR_PIVOT_NO_EXIST,
+		ERR_LIST_EMPTY,
 		ERR_BOTTOM
 	};
 	const char* _errStr;		///< Describe the reason for error..

@@ -21,9 +21,11 @@ namespace RedisCpp
 const char* RedisConn::_errDes[ERR_BOTTOM] =
 {
 		"No error." ,
-		"NULL return , fatal error!",
+		"NULL pointer , fatal error!",
 		"Has no connection to the redis server.",
-		"BEFORE, Insert Position error ,must BEFORE or AFTER."
+		"BEFORE, Insert Position error ,must BEFORE or AFTER.",
+		"Inser Error,pivot is not found.",
+		"List is empty"
 };
 
 RedisConn::RedisConn( )
@@ -201,7 +203,7 @@ bool RedisConn::reconnect( )
 	return ( connect( ) );
 }
 
-const std::string RedisConn::getErrorStr( ) const
+const char* RedisConn::getErrorStr( ) const
 {
 	return _errStr;
 }
@@ -497,18 +499,28 @@ bool RedisConn::linsert( const std::string& key , INSERT_POS position ,
 	{
 		if ( REDIS_REPLY_INTEGER == reply->type )
 		{
-			retval = reply->integer;
+			if( reply->integer == -1 )
+			{
+				_errStr = _errDes[ ERR_PIVOT_NO_EXIST ];
+				ret = false;
+			}else if( reply->integer == 0 )
+			{
+				_errStr = _errDes[ ERR_LIST_EMPTY ];
+				ret = false;
+			}else
+			{
+				retval = reply->integer;
+				ret = true;
+			}
+		}else
+		{
+			ret = false;
 		}
-		ret = true;
 	}
 
 	if ( NULL != reply )
 	{
 		freeReplyObject( reply );
-	}
-	else
-	{
-
 	}
 
 	return ret;
