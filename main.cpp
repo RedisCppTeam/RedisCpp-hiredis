@@ -111,6 +111,8 @@
 //}
 
 
+using std::find;
+
 
 ////////////////////////////////////pool test////////////////////////////////
 void* CallBack( void* arg )
@@ -140,6 +142,7 @@ void* CallBack( void* arg )
 
 
 ///< 链接池的方式。real	1m25.556s    user	0m43.774s    sys	1m47.368s  cpu 187%
+
 
 int main( )
 {
