@@ -16,41 +16,86 @@
 using RedisCpp::BEFORE;
 using RedisCpp::AFTER;
 
-int main( )
+void TestList( )
 {
+	int64_t ret = 0;
+	uint64_t ret2 = 0;
 	RedisCpp::RedisConn con;
 	if ( !con.connect( "127.0.0.1", 6379 ) )
 	{
 		std::cout << "connect error " << con.getErrorStr( ) << std::endl;
-		return 0;
+		return ;
 	}
 
 	std::string value;
-//	if ( !con.hget( "newHash", "yuhaiyang", value ) )
+
+//	if ( !con.lpush( "testList", "yuhaiyang", ret2 ) )
 //	{
-//		std::cout << "hget error " << con.getErrorStr( ) << std::endl;
+//		std::cout << "error: " << con.getErrorStr( ) << std::endl;
+//	}else
+//	{
+//		std::cout << "len = " << ret2 << std::endl;
 //	}
 
-	int64_t ret = 0;
-	uint64_t ret2 = 0;
-	if ( !con.lpush( "testSet", "yuhaiyang", ret2 ) )
-	{
-		std::cout << "error: " << con.getErrorStr( ) << std::endl;
-	}
-	std::cout << ret2 << std::endl;
+//	if( !con.linsert("testList",AFTER, "huang", "chenjun", ret ) )
+//	{
+//		std::cout << "error: " << con.getErrorStr( ) << std::endl;
+//	}
 
-	if( !con.linsert("testList",BEFORE, "yuhaiyang", "huangshaoliang", ret ) )
+//	if( !con.lpop( "testList", value ) )
+//	{
+//		std::cout << "error: " << con.getErrorStr( ) << std::endl;
+//	}else
+//	{
+//		std::cout << "value: " << value << std::endl;
+//	}
+	RedisCpp::ValueList valueList;
+	if( !con.lrange( "testList", 0 , -1, valueList ) )
 	{
-		std::cout << "error: " << con.getErrorStr( ) << std::endl;
-	}
-
-	if( !con.lpop( "testList12", value ) )
-	{
-		std::cout << "error: " << con.getErrorStr( ) << std::endl;
+		std::cout << "error " << con.getErrorStr() << std::endl;
 	}else
 	{
-		std::cout << "value: " << value << std::endl;
+		RedisCpp::ValueList::const_iterator it = valueList.begin();
+
+		for( ; it != valueList.end(); it++ )
+		{
+			std::cout << "value: " << *it << std::endl;
+		}
 	}
+	if( !con.rpop( "testList", value) )
+	{
+		std::cout << "error " << con.getErrorStr() << std::endl;
+	}
+	else
+	{
+		std::cout << "pop value: " << value << std::endl;
+	}
+
+}
+
+void TestHash( void )
+{
+	int64_t ret = 0;
+	uint64_t ret2 = 0;
+	RedisCpp::RedisConn con;
+	if ( !con.connect( "127.0.0.1", 6379 ) )
+	{
+		std::cout << "connect error " << con.getErrorStr( ) << std::endl;
+		return ;
+	}
+
+	std::string value;
+	if ( !con.hget( "newHash", "yuhaiyang", value ) )
+	{
+		std::cout << "hget error " << con.getErrorStr( ) << std::endl;
+	}
+
+}
+
+
+int main( )
+{
+	TestList();
 	return 0;
 }
 

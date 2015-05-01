@@ -25,7 +25,8 @@ const char* RedisConn::_errDes[ERR_BOTTOM] =
 		"Has no connection to the redis server.",
 		"Insert into list error ,position must BEFORE or AFTER.",
 		"Inser Error,pivot is not found.",
-		"List is empty"
+		"List is empty",
+		"Key not find"
 };
 
 RedisConn::RedisConn( )
@@ -273,14 +274,17 @@ bool RedisConn::lpop( const std::string& key , std::string& value )
 	else
 	{
 		// 失败
-		if( NULL == reply->str )
+		if ( NULL == reply->str )
 		{
+			_errStr = std::string( _errDes[ERR_NO_KEY] ) + " or " + _errDes[ERR_LIST_EMPTY];
 			value = "";
-		}else
+			ret = false;
+		}
+		else
 		{
 			value = reply->str;
+			ret = true;
 		}
-		ret = true;
 	}
 
 	if ( NULL != reply )
@@ -422,8 +426,19 @@ bool RedisConn::rpop( const std::string& key , std::string& value )
 	}
 	else
 	{
-		value = reply->str;
-		ret = true;
+		// 失败
+		if ( NULL == reply->str )
+		{
+			_errStr = std::string( _errDes[ERR_NO_KEY] ) + " or "
+			                + _errDes[ERR_LIST_EMPTY];
+			value = "";
+			ret = false;
+		}
+		else
+		{
+			value = reply->str;
+			ret = true;
+		}
 	}
 
 	if ( NULL != reply )

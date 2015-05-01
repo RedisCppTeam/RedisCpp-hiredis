@@ -161,9 +161,6 @@ public:
 
 	bool lrange( const std::string &key, uint32_t start, int32_t end, ValueList& valueList );
 
-	bool lrange( const std::string &key , uint32_t start , uint32_t end ,
-	                ValueList& valueList );
-
 	bool rpush( const std::string& key , const std::string& value , uint64_t& retval );
 
 	bool rpop( const std::string& key , std::string& value );
@@ -233,6 +230,7 @@ private:
 		ERR_POSITION,
 		ERR_PIVOT_NO_EXIST,
 		ERR_LIST_EMPTY,
+		ERR_NO_KEY,
 		ERR_BOTTOM
 	};
 	std::string _errStr;		///< Describe the reason for error..
