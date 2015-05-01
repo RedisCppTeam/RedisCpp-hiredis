@@ -32,12 +32,16 @@ int main( )
 //	}
 
 	int64_t ret = 0;
+	uint64_t ret2 = 0;
+	if ( !con.lpush( "testSet", "yuhaiyang", ret2 ) )
+	{
+		std::cout << "error: " << con.getErrorStr( ) << std::endl;
+	}
+	std::cout << ret2 << std::endl;
+
 	if( !con.linsert("testList",BEFORE, "yuhaiyang", "huangshaoliang", ret ) )
 	{
 		std::cout << "error: " << con.getErrorStr( ) << std::endl;
-	}else
-	{
-		std::cout << "value: " << value << std::endl;
 	}
 	return 0;
 }

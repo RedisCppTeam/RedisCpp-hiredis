@@ -23,7 +23,7 @@ const char* RedisConn::_errDes[ERR_BOTTOM] =
 		"No error." ,
 		"NULL pointer , fatal error!",
 		"Has no connection to the redis server.",
-		"BEFORE, Insert Position error ,must BEFORE or AFTER.",
+		"Insert into list error ,position must BEFORE or AFTER.",
 		"Inser Error,pivot is not found.",
 		"List is empty"
 };
@@ -36,7 +36,7 @@ RedisConn::RedisConn( )
 	_port = 0;
 	_timeout = 0;
 	_connected = false;
-	_errStr = NULL ;
+	_errStr = _errDes[ ERR_NO_ERROR ] ;
 }
 
 void RedisConn::init( const std::string &host , const uint16_t port , const std::string& password ,
@@ -53,7 +53,7 @@ bool RedisConn::_getError( const redisReply* reply )
 	_errStr = _errDes[ ERR_NO_ERROR ];
 	if ( reply == NULL )
 	{
-		_errStr = _errDes[0];
+		_errStr = _errDes[ ERR_NULL ];
 		return true;
 	}
 	// have error
@@ -73,7 +73,7 @@ bool RedisConn::_getError( const redisContext* redCtx )
 	_errStr = _errDes[ ERR_NO_ERROR ];
 	if ( redCtx == NULL )
 	{
-		_errStr = _errDes[0];
+		_errStr = _errDes[ ERR_NULL ];
 		return true;
 	}
 	if ( redCtx->err != 0 )
@@ -203,7 +203,7 @@ bool RedisConn::reconnect( )
 	return ( connect( ) );
 }
 
-const char* RedisConn::getErrorStr( ) const
+const std::string RedisConn::getErrorStr( ) const
 {
 	return _errStr;
 }

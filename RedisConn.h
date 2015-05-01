@@ -136,12 +136,14 @@ public:
 		return _connected;
 	}
 
+
+
 	/**
 	 * @brief 获取错误的原因
 	 *
 	 * ＠return 返回发生错误的原因.
 	 */
-	const char* getErrorStr( ) const;
+	const std::string getErrorStr( ) const;
 
 	/**
 	 * @brief 直接发送指令参数给　redis 服务器。
@@ -233,7 +235,7 @@ private:
 		ERR_LIST_EMPTY,
 		ERR_BOTTOM
 	};
-	const char* _errStr;		///< Describe the reason for error..
+	std::string _errStr;		///< Describe the reason for error..
 
 	static const char* _errDes[ ERR_BOTTOM ];	///< describe error
 };
