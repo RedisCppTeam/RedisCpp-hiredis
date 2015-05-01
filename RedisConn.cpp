@@ -272,7 +272,14 @@ bool RedisConn::lpop( const std::string& key , std::string& value )
 	}
 	else
 	{
-		value = reply->str;
+		// 失败
+		if( NULL == reply->str )
+		{
+			value = "";
+		}else
+		{
+			value = reply->str;
+		}
 		ret = true;
 	}
 

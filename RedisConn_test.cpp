@@ -43,6 +43,14 @@ int main( )
 	{
 		std::cout << "error: " << con.getErrorStr( ) << std::endl;
 	}
+
+	if( !con.lpop( "testList12", value ) )
+	{
+		std::cout << "error: " << con.getErrorStr( ) << std::endl;
+	}else
+	{
+		std::cout << "value: " << value << std::endl;
+	}
 	return 0;
 }
 
