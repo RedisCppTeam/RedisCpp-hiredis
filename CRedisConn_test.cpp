@@ -11,7 +11,7 @@
  *
  * 修订说明:初始版本
  */
-#include "RedisConn.h"
+#include "CRedisConn.h"
 
 using RedisCpp::BEFORE;
 using RedisCpp::AFTER;
@@ -20,7 +20,7 @@ void TestList( )
 {
 	int64_t ret = 0;
 	uint64_t ret2 = 0;
-	RedisCpp::RedisConn con;
+	RedisCpp::CRedisConn con;
 	if ( !con.connect( "127.0.0.1", 6379 ) )
 	{
 		std::cout << "connect error " << con.getErrorStr( ) << std::endl;
@@ -77,7 +77,7 @@ void TestHash( void )
 {
 	int64_t ret = 0;
 	uint64_t ret2 = 0;
-	RedisCpp::RedisConn con;
+	RedisCpp::CRedisConn con;
 	if ( !con.connect( "127.0.0.1", 6379 ) )
 	{
 		std::cout << "connect error " << con.getErrorStr( ) << std::endl;

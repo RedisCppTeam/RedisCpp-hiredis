@@ -36,7 +36,7 @@ typedef enum INSERT_POS
 {
 	BEFORE,			///< 插入到指定元素之前。
 	AFTER
-} INSERT_POS;
+} E_INSERT_POS;
 
 /**
  *@brief 此类基于 hiredis 用于保持与 redis-server 的链接。
@@ -60,12 +60,12 @@ typedef enum INSERT_POS
 }
  *
  */
-class RedisConn
+class CRedisConn
 {
 public:
-	RedisConn( );
+	CRedisConn( );
 
-	virtual ~RedisConn( );
+	virtual ~CRedisConn( );
 
 	/**
 	 *@brief 初始化链接信息
@@ -222,7 +222,7 @@ private:
 	bool _connected;			///< if connected
 
 	///< error number
-	enum ERROR_NO
+	enum E_ERROR_NO
 	{
 		ERR_NO_ERROR = 0,
 		ERR_NULL,

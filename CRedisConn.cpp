@@ -12,13 +12,13 @@
  * 修订说明:初始版本
  */
 
-#include "RedisConn.h"
 #include <string.h>
+#include "CRedisConn.h"
 
 namespace RedisCpp
 {
 // 错误描述。
-const char* RedisConn::_errDes[ERR_BOTTOM] =
+const char* CRedisConn::_errDes[ERR_BOTTOM] =
 {
 		"No error." ,
 		"NULL pointer , fatal error!",
@@ -29,7 +29,7 @@ const char* RedisConn::_errDes[ERR_BOTTOM] =
 		"Key not find"
 };
 
-RedisConn::RedisConn( )
+CRedisConn::CRedisConn( )
 {
 	_redCtx = NULL;
 	_host.clear( );
@@ -40,7 +40,7 @@ RedisConn::RedisConn( )
 	_errStr = _errDes[ ERR_NO_ERROR ] ;
 }
 
-void RedisConn::init( const std::string &host , const uint16_t port , const std::string& password ,
+void CRedisConn::init( const std::string &host , const uint16_t port , const std::string& password ,
                 const uint32_t timeout )
 {
 	_host = host;
@@ -49,7 +49,7 @@ void RedisConn::init( const std::string &host , const uint16_t port , const std:
 	_timeout = timeout;
 }
 
-bool RedisConn::_getError( const redisReply* reply )
+bool CRedisConn::_getError( const redisReply* reply )
 {
 	_errStr = _errDes[ ERR_NO_ERROR ];
 	if ( reply == NULL )
@@ -69,7 +69,7 @@ bool RedisConn::_getError( const redisReply* reply )
 	}
 }
 
-bool RedisConn::_getError( const redisContext* redCtx )
+bool CRedisConn::_getError( const redisContext* redCtx )
 {
 	_errStr = _errDes[ ERR_NO_ERROR ];
 	if ( redCtx == NULL )
@@ -88,7 +88,7 @@ bool RedisConn::_getError( const redisContext* redCtx )
 	}
 }
 
-bool RedisConn::auth( const std::string& password )
+bool CRedisConn::auth( const std::string& password )
 {
 	if ( !_connected )
 	{
@@ -117,7 +117,7 @@ bool RedisConn::auth( const std::string& password )
 	return ret;
 }
 
-bool RedisConn::connect( void )
+bool CRedisConn::connect( void )
 {
 	if ( _connected )
 	{
@@ -152,7 +152,7 @@ bool RedisConn::connect( void )
 	}
 }
 
-void RedisConn::disConnect( )
+void CRedisConn::disConnect( )
 {
 	if ( _connected && NULL != _redCtx )
 	{
@@ -162,7 +162,7 @@ void RedisConn::disConnect( )
 	_connected = false;
 }
 
-bool RedisConn::connect( const std::string &host , const uint16_t port ,
+bool CRedisConn::connect( const std::string &host , const uint16_t port ,
                 const std::string& password , const uint32_t timeout )
 {
 	// Init attribute.
@@ -171,7 +171,7 @@ bool RedisConn::connect( const std::string &host , const uint16_t port ,
 	return ( connect( ) );
 }
 
-bool RedisConn::ping( )
+bool CRedisConn::ping( )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -199,17 +199,17 @@ bool RedisConn::ping( )
 	return ret;
 }
 
-bool RedisConn::reconnect( )
+bool CRedisConn::reconnect( )
 {
 	return ( connect( ) );
 }
 
-const std::string RedisConn::getErrorStr( ) const
+const std::string CRedisConn::getErrorStr( ) const
 {
 	return _errStr;
 }
 
-redisReply* RedisConn::redisCmd( const char *format , ... )
+redisReply* CRedisConn::redisCmd( const char *format , ... )
 {
 	va_list ap;
 	va_start( ap, format );
@@ -218,14 +218,14 @@ redisReply* RedisConn::redisCmd( const char *format , ... )
 	return reply;
 }
 
-RedisConn::~RedisConn( )
+CRedisConn::~CRedisConn( )
 {
 	disConnect( );
 }
 
 ////////////////////////////////// list 类的方法 ////////////////////////////////////////
 
-bool RedisConn::lpush( const std::string& key , const std::string& value , uint64_t& retval )
+bool CRedisConn::lpush( const std::string& key , const std::string& value , uint64_t& retval )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -256,7 +256,7 @@ bool RedisConn::lpush( const std::string& key , const std::string& value , uint6
 	return ret;
 }
 
-bool RedisConn::lpop( const std::string& key , std::string& value )
+bool CRedisConn::lpop( const std::string& key , std::string& value )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -299,7 +299,7 @@ bool RedisConn::lpop( const std::string& key , std::string& value )
 	return ret;
 }
 
-bool RedisConn::_getArryToList( redisReply* reply , ValueList& valueList )
+bool CRedisConn::_getArryToList( redisReply* reply , ValueList& valueList )
 {
 	if ( NULL == reply )
 	{
@@ -322,7 +322,7 @@ bool RedisConn::_getArryToList( redisReply* reply , ValueList& valueList )
 	return true;
 }
 
-bool RedisConn::_getArryToMap( redisReply* reply , ValueMap& valueMap )
+bool CRedisConn::_getArryToMap( redisReply* reply , ValueMap& valueMap )
 {
 	if ( NULL == reply )
 	{
@@ -341,7 +341,7 @@ bool RedisConn::_getArryToMap( redisReply* reply , ValueMap& valueMap )
 	return true;
 }
 
-bool RedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
+bool CRedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
                 ValueList& valueList )
 {
 	if ( !_connected || !_redCtx )
@@ -378,7 +378,7 @@ bool RedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
 	return ret;
 }
 
-bool RedisConn::rpush( const std::string& key , const std::string& value , uint64_t& retval )
+bool CRedisConn::rpush( const std::string& key , const std::string& value , uint64_t& retval )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -409,7 +409,7 @@ bool RedisConn::rpush( const std::string& key , const std::string& value , uint6
 	return ret;
 }
 
-bool RedisConn::rpop( const std::string& key , std::string& value )
+bool CRedisConn::rpop( const std::string& key , std::string& value )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -453,7 +453,7 @@ bool RedisConn::rpop( const std::string& key , std::string& value )
 	return ret;
 }
 
-bool RedisConn::lindex( const std::string& key , int32_t index , std::string& value )
+bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& value )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -486,7 +486,7 @@ bool RedisConn::lindex( const std::string& key , int32_t index , std::string& va
 	return ret;
 }
 
-bool RedisConn::linsert( const std::string& key , INSERT_POS position ,
+bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
                 const std::string& pivot , const std::string value , int64_t& retval )
 {
 	if ( !_connected || !_redCtx )
@@ -548,7 +548,7 @@ bool RedisConn::linsert( const std::string& key , INSERT_POS position ,
 	return ret;
 }
 
-bool RedisConn::llen( const std::string& key , uint64_t& retval )
+bool CRedisConn::llen( const std::string& key , uint64_t& retval )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -585,7 +585,7 @@ bool RedisConn::llen( const std::string& key , uint64_t& retval )
 }
 
 //////////////////hash方法/////////////////////////////
-bool RedisConn::hget( const std::string& key , const std::string& filed , std::string& value )
+bool CRedisConn::hget( const std::string& key , const std::string& filed , std::string& value )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -618,7 +618,7 @@ bool RedisConn::hget( const std::string& key , const std::string& filed , std::s
 	return ret;
 }
 
-bool RedisConn::hset( const std::string& key , const std::string& filed , const std::string& value ,
+bool CRedisConn::hset( const std::string& key , const std::string& filed , const std::string& value ,
                 uint32_t& retval )
 {
 	if ( !_connected || !_redCtx )
@@ -654,7 +654,7 @@ bool RedisConn::hset( const std::string& key , const std::string& filed , const 
 
 }
 
-bool RedisConn::hdel( const std::string& key , const std::string& filed , uint32_t& retval )
+bool CRedisConn::hdel( const std::string& key , const std::string& filed , uint32_t& retval )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -687,7 +687,7 @@ bool RedisConn::hdel( const std::string& key , const std::string& filed , uint32
 	return ret;
 }
 
-bool RedisConn::hgetall( const std::string& key , ValueMap& valueMap )
+bool CRedisConn::hgetall( const std::string& key , ValueMap& valueMap )
 {
 	if ( !_connected || !_redCtx )
 	{
