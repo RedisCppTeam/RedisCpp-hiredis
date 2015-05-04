@@ -21,15 +21,31 @@
 #include <string>
 #include <list>
 #include <map>
-
+#include <stdexcept>
 
 #define DEBUGOUT( attr, value ) std::cout << attr << value << std::endl;
+
+#ifndef DISALLOW_COPY_AND_ASSIGN
+#define DISALLOW_COPY_AND_ASSIGN( typeName )	\
+	typeName( const typeName & );		\
+	typeName & operator=( const typeName & )
+#endif
 
 namespace RedisCpp
 {
 
 typedef std::list<std::string> ValueList;
 typedef std::map<std::string,std::string> ValueMap;
+
+class NullReplyException : public std::runtime_error
+{
+public:
+	NullReplyException( ):
+		std::runtime_error( "reply NULL" )
+	{
+	}
+};
+
 
 ///< 这个是插入时候是插入在指定元素之前，或者指定元素之后
 typedef enum INSERT_POS
@@ -63,9 +79,9 @@ typedef enum INSERT_POS
 class CRedisConn
 {
 public:
-	CRedisConn( );
+	CRedisConn( void );
 
-	virtual ~CRedisConn( );
+	virtual ~CRedisConn( void );
 
 	/**
 	 *@brief 初始化链接信息
@@ -155,7 +171,8 @@ public:
 	redisReply*  redisCmd( const char *format, ... );
 
 	///////////////////////////////// list 的方法 /////////////////////////////////////
-	bool lpush(const std::string& key, const std::string& value, uint64_t& retval );
+	bool lpush( const std::string& key , const std::string& value , uint64_t& retval )
+	                throw ( NullReplyException );
 
 	bool lpop(const std::string& key, std::string& value );
 
@@ -207,12 +224,14 @@ protected:
 
 	bool _getError( const redisReply* reply );
 
-	redisContext* _getCtx( ) const
+	inline redisContext* _getCtx( ) const
 	{
 		return _redCtx;
 	}
 
 private:
+	DISALLOW_COPY_AND_ASSIGN( CRedisConn );
+
 	redisContext *_redCtx;		///< redis connector context
 
 	std::string _host;         		///< redis host

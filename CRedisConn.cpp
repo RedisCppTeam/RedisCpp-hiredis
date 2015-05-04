@@ -12,7 +12,6 @@
  * 修订说明:初始版本
  */
 
-#include <string.h>
 #include "CRedisConn.h"
 
 namespace RedisCpp
@@ -55,7 +54,7 @@ bool CRedisConn::_getError( const redisReply* reply )
 	if ( reply == NULL )
 	{
 		_errStr = _errDes[ ERR_NULL ];
-		return true;
+		throw NullReplyException();
 	}
 	// have error
 	if ( reply->type == REDIS_REPLY_ERROR )
@@ -87,6 +86,8 @@ bool CRedisConn::_getError( const redisContext* redCtx )
 		return false;
 	}
 }
+
+
 
 bool CRedisConn::auth( const std::string& password )
 {
@@ -226,6 +227,7 @@ CRedisConn::~CRedisConn( )
 ////////////////////////////////// list 类的方法 ////////////////////////////////////////
 
 bool CRedisConn::lpush( const std::string& key , const std::string& value , uint64_t& retval )
+                throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -252,8 +254,8 @@ bool CRedisConn::lpush( const std::string& key , const std::string& value , uint
 	{
 		freeReplyObject( reply );
 	}
-
 	return ret;
+
 }
 
 bool CRedisConn::lpop( const std::string& key , std::string& value )
@@ -370,10 +372,6 @@ bool CRedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
 	{
 		freeReplyObject( reply );
 	}
-	else
-	{
-
-	}
 
 	return ret;
 }
@@ -445,10 +443,7 @@ bool CRedisConn::rpop( const std::string& key , std::string& value )
 	{
 		freeReplyObject( reply );
 	}
-	else
-	{
 
-	}
 
 	return ret;
 }
@@ -470,17 +465,23 @@ bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& v
 	}
 	else
 	{
-		value = reply->str;
-		ret = true;
+		// 失败
+		if ( NULL == reply->str )
+		{
+			_errStr =  _errDes[ERR_NO_KEY] ;
+			value = "";
+			ret = false;
+		}
+		else
+		{
+			value = reply->str;
+			ret = true;
+		}
 	}
 
 	if ( NULL != reply )
 	{
 		freeReplyObject( reply );
-	}
-	else
-	{
-
 	}
 
 	return ret;
@@ -576,10 +577,6 @@ bool CRedisConn::llen( const std::string& key , uint64_t& retval )
 	{
 		freeReplyObject( reply );
 	}
-	else
-	{
-
-	}
 
 	return ret;
 }
@@ -610,10 +607,7 @@ bool CRedisConn::hget( const std::string& key , const std::string& filed , std::
 	{
 		freeReplyObject( reply );
 	}
-	else
-	{
 
-	}
 
 	return ret;
 }
@@ -645,10 +639,6 @@ bool CRedisConn::hset( const std::string& key , const std::string& filed , const
 	{
 		freeReplyObject( reply );
 	}
-	else
-	{
-
-	}
 
 	return ret;
 
@@ -678,10 +668,6 @@ bool CRedisConn::hdel( const std::string& key , const std::string& filed , uint3
 	if ( NULL != reply )
 	{
 		freeReplyObject( reply );
-	}
-	else
-	{
-
 	}
 
 	return ret;
@@ -714,10 +700,6 @@ bool CRedisConn::hgetall( const std::string& key , ValueMap& valueMap )
 	if ( NULL != reply )
 	{
 		freeReplyObject( reply );
-	}
-	else
-	{
-
 	}
 
 	return ret;

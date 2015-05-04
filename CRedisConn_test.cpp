@@ -12,6 +12,7 @@
  * 修订说明:初始版本
  */
 #include "CRedisConn.h"
+#include <unistd.h>
 
 using RedisCpp::BEFORE;
 using RedisCpp::AFTER;
@@ -29,14 +30,22 @@ void TestList( )
 
 	std::string value;
 
-//	if ( !con.lpush( "testList", "yuhaiyang", ret2 ) )
-//	{
-//		std::cout << "error: " << con.getErrorStr( ) << std::endl;
-//	}else
-//	{
-//		std::cout << "len = " << ret2 << std::endl;
-//	}
+	sleep( 5 );
 
+	try
+	{
+		if ( !con.lpush( "testList", "yuhaiyang", ret2 ) )
+		{
+			std::cout << "error: " << con.getErrorStr( ) << std::endl;
+		}
+		else
+		{
+			std::cout << "len = " << ret2 << std::endl;
+		}
+	} catch( std::runtime_error& e )
+	{
+		std::cout << e.what( ) << std::endl;
+	}
 //	if( !con.linsert("testList",AFTER, "huang", "chenjun", ret ) )
 //	{
 //		std::cout << "error: " << con.getErrorStr( ) << std::endl;
@@ -49,27 +58,37 @@ void TestList( )
 //	{
 //		std::cout << "value: " << value << std::endl;
 //	}
-	RedisCpp::ValueList valueList;
-	if( !con.lrange( "testList", 0 , -1, valueList ) )
-	{
-		std::cout << "error " << con.getErrorStr() << std::endl;
-	}else
-	{
-		RedisCpp::ValueList::const_iterator it = valueList.begin();
+//	RedisCpp::ValueList valueList;
+//	if( !con.lrange( "testList", 0 , -1, valueList ) )
+//	{
+//		std::cout << "error " << con.getErrorStr() << std::endl;
+//	}else
+//	{
+//		RedisCpp::ValueList::const_iterator it = valueList.begin();
+//
+//		for( ; it != valueList.end(); it++ )
+//		{
+//			std::cout << "value: " << *it << std::endl;
+//		}
+//	}
+//	if( !con.rpop( "testList", value) )
+//	{
+//		std::cout << "error " << con.getErrorStr() << std::endl;
+//	}
+//	else
+//	{
+//		std::cout << "pop value: " << value << std::endl;
+//	}
 
-		for( ; it != valueList.end(); it++ )
-		{
-			std::cout << "value: " << *it << std::endl;
-		}
-	}
-	if( !con.rpop( "testList", value) )
-	{
-		std::cout << "error " << con.getErrorStr() << std::endl;
-	}
-	else
-	{
-		std::cout << "pop value: " << value << std::endl;
-	}
+//	if ( !con.lindex( "testList", 1,value ) )
+//	{
+//		std::cout << "lindex error " << con.getErrorStr( ) << std::endl;
+//	}
+//	else
+//	{
+//		std::cout << "get value: " << value << std::endl;
+//	}
+//
 
 }
 
