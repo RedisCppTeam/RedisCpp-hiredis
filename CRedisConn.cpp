@@ -68,7 +68,7 @@ bool CRedisConn::_getError( const redisReply* reply )
 	}
 }
 
-bool CRedisConn::_getError( const redisContext* redCtx )
+bool CRedisConn::_getError( const redisContext* redCtx ) throw ( NullReplyException )
 {
 	_errStr = _errDes[ ERR_NO_ERROR ];
 	if ( redCtx == NULL )

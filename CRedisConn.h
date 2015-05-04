@@ -220,7 +220,7 @@ protected:
 	 */
 	bool _getArryToMap( redisReply* reply , ValueMap& valueMap );
 
-	bool _getError( const redisContext* redCtx );
+	bool _getError( const redisContext* redCtx ) throw ( NullReplyException );
 
 	bool _getError( const redisReply* reply );
 
