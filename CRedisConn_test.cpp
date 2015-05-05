@@ -111,11 +111,11 @@ void TestHash( void )
 
 }
 
-
-int main( )
-{
-	TestList();
-	return 0;
-}
+//
+//int main( )
+//{
+//	TestList();
+//	return 0;
+//}
 
 
