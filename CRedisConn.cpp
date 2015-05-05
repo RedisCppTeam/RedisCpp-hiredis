@@ -18,9 +18,16 @@ namespace RedisCpp
 {
 // 错误描述。
 const char* CRedisConn::_errDes[ERR_BOTTOM] =
-{ "No error.", "NULL pointer , fatal error!", "Has no connection to the redis server.",
+{
+		"No error.",
+		"NULL pointer ",
+		" fatal error!",
+		"Has no connection to the redis server.",
                 "Insert into list error ,position must BEFORE or AFTER.",
-                "Inser Error,pivot is not found.", "List is empty", "Key not find" };
+                "Inser Error,pivot is not found.",
+                "List is empty",
+                "Key not find"
+};
 
 CRedisConn::CRedisConn( )
 {
