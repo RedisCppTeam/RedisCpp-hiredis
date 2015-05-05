@@ -29,66 +29,94 @@ void TestList( )
 	}
 
 	std::string value;
-
-	sleep( 5 );
-
-	try
+/*
+	//< key 不是list类型
+	if ( !con.lpush( "test", "yuhaiyang", ret2 ) )
 	{
-		if ( !con.lpush( "testList", "yuhaiyang", ret2 ) )
-		{
-			std::cout << "error: " << con.getErrorStr( ) << std::endl;
-		}
-		else
-		{
-			std::cout << "len = " << ret2 << std::endl;
-		}
-	} catch( std::runtime_error& e )
+		std::cout << "lpush error: " << con.getErrorStr( ) << std::endl;
+	}else
 	{
-		std::cout << e.what( ) << std::endl;
+		std::cout << "len = " << ret2 << std::endl;
 	}
-//	if( !con.linsert("testList",AFTER, "huang", "chenjun", ret ) )
-//	{
-//		std::cout << "error: " << con.getErrorStr( ) << std::endl;
-//	}
 
-//	if( !con.lpop( "testList", value ) )
-//	{
-//		std::cout << "error: " << con.getErrorStr( ) << std::endl;
-//	}else
-//	{
-//		std::cout << "value: " << value << std::endl;
-//	}
-//	RedisCpp::ValueList valueList;
-//	if( !con.lrange( "testList", 0 , -1, valueList ) )
-//	{
-//		std::cout << "error " << con.getErrorStr() << std::endl;
-//	}else
-//	{
-//		RedisCpp::ValueList::const_iterator it = valueList.begin();
-//
-//		for( ; it != valueList.end(); it++ )
-//		{
-//			std::cout << "value: " << *it << std::endl;
-//		}
-//	}
-//	if( !con.rpop( "testList", value) )
-//	{
-//		std::cout << "error " << con.getErrorStr() << std::endl;
-//	}
-//	else
-//	{
-//		std::cout << "pop value: " << value << std::endl;
-//	}
 
-//	if ( !con.lindex( "testList", 1,value ) )
-//	{
-//		std::cout << "lindex error " << con.getErrorStr( ) << std::endl;
-//	}
-//	else
-//	{
-//		std::cout << "get value: " << value << std::endl;
-//	}
-//
+	//< key 不存在 ；key 不是list类型
+	if( !con.lpop( "test", value ) )
+	{
+		std::cout << "lpop error: " << con.getErrorStr( ) << std::endl;
+	}else
+	{
+		std::cout << "value: " << value << std::endl;
+	}
+
+
+	//< key 不是list类型
+	if ( !con.rpush( "testM", "yuhaiyang", ret2 ) )
+	{
+		std::cout << "rpush error: " << con.getErrorStr( ) << std::endl;
+	}else
+	{
+		std::cout << "len = " << ret2 << std::endl;
+	}
+
+
+	//< key 不存在 ；key 不是list类型
+	if( !con.rpop( "Atest", value ) )
+	{
+		std::cout << "rpop error: " << con.getErrorStr( ) << std::endl;
+	}else
+	{
+		std::cout << "value: " << value << std::endl;
+	}
+
+	//< key 不存在; key 不是list类型
+	if( !con.llen("test",ret2) )
+	{
+		std::cout << "llen error: " << con.getErrorStr( ) << std::endl;
+
+	}
+	else
+	{
+		std::cout << "llen = " << ret2 << std::endl;
+	}
+
+	//< key 不存在；key 不是list类型; position 错误; pivot 不存在
+	if( !con.linsert("Ltest",AFTER, "value0", "chenjun", ret ) )
+	{
+		std::cout << "linsert error: " << con.getErrorStr( ) << std::endl;
+	}
+	else
+	{
+		std::cout << "revalue = " << ret << std::endl;
+	}
+
+
+
+	//< key不存在； key 不是list类型； start stop超出范围；
+	RedisCpp::ValueList valueList;
+	if( !con.lrange( "test",  -9, -8, valueList ) )
+	{
+		std::cout << "error " << con.getErrorStr() << std::endl;
+	}else
+	{
+		RedisCpp::ValueList::const_iterator it = valueList.begin();
+
+		for( ; it != valueList.end(); it++ )
+		{
+			std::cout << "value: " << *it << std::endl;
+		}
+	}
+
+*/
+	//key 不存在;  key 不是list类型; index不在范围内
+	if( !con.lindex("test",1,value) )
+	{
+		std::cout << "lindex error: " << con.getErrorStr( ) << std::endl;
+	}
+	else
+	{
+		std::cout<<value.c_str()<<std::endl;
+	}
 
 }
 

@@ -18,15 +18,9 @@ namespace RedisCpp
 {
 // 错误描述。
 const char* CRedisConn::_errDes[ERR_BOTTOM] =
-{
-		"No error." ,
-		"NULL pointer , fatal error!",
-		"Has no connection to the redis server.",
-		"Insert into list error ,position must BEFORE or AFTER.",
-		"Inser Error,pivot is not found.",
-		"List is empty",
-		"Key not find"
-};
+{ "No error.", "NULL pointer , fatal error!", "Has no connection to the redis server.",
+                "Insert into list error ,position must BEFORE or AFTER.",
+                "Inser Error,pivot is not found.", "List is empty", "Key not find" };
 
 CRedisConn::CRedisConn( )
 {
@@ -36,7 +30,7 @@ CRedisConn::CRedisConn( )
 	_port = 0;
 	_timeout = 0;
 	_connected = false;
-	_errStr = _errDes[ ERR_NO_ERROR ] ;
+	_errStr = _errDes[ERR_NO_ERROR];
 }
 
 void CRedisConn::init( const std::string &host , const uint16_t port , const std::string& password ,
@@ -50,11 +44,11 @@ void CRedisConn::init( const std::string &host , const uint16_t port , const std
 
 bool CRedisConn::_getError( const redisReply* reply )
 {
-	_errStr = _errDes[ ERR_NO_ERROR ];
+	_errStr = _errDes[ERR_NO_ERROR];
 	if ( reply == NULL )
 	{
-		_errStr = _errDes[ ERR_NULL ];
-		throw NullReplyException();
+		_errStr = _errDes[ERR_NULL];
+		throw NullReplyException( );
 	}
 	// have error
 	if ( reply->type == REDIS_REPLY_ERROR )
@@ -70,10 +64,10 @@ bool CRedisConn::_getError( const redisReply* reply )
 
 bool CRedisConn::_getError( const redisContext* redCtx ) throw ( NullReplyException )
 {
-	_errStr = _errDes[ ERR_NO_ERROR ];
+	_errStr = _errDes[ERR_NO_ERROR];
 	if ( redCtx == NULL )
 	{
-		_errStr = _errDes[ ERR_NULL ];
+		_errStr = _errDes[ERR_NULL];
 		return true;
 	}
 	if ( redCtx->err != 0 )
@@ -86,8 +80,6 @@ bool CRedisConn::_getError( const redisContext* redCtx ) throw ( NullReplyExcept
 		return false;
 	}
 }
-
-
 
 bool CRedisConn::auth( const std::string& password )
 {
@@ -258,7 +250,7 @@ bool CRedisConn::lpush( const std::string& key , const std::string& value , uint
 
 }
 
-bool CRedisConn::lpop( const std::string& key , std::string& value )
+bool CRedisConn::lpop( const std::string& key , std::string& value ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -278,7 +270,8 @@ bool CRedisConn::lpop( const std::string& key , std::string& value )
 		// 失败
 		if ( NULL == reply->str )
 		{
-			_errStr = std::string( _errDes[ERR_NO_KEY] ) + " or " + _errDes[ERR_LIST_EMPTY];
+			_errStr = std::string( _errDes[ERR_NO_KEY] ) + " or "
+			                + _errDes[ERR_LIST_EMPTY];
 			value = "";
 			ret = false;
 		}
@@ -292,10 +285,6 @@ bool CRedisConn::lpop( const std::string& key , std::string& value )
 	if ( NULL != reply )
 	{
 		freeReplyObject( reply );
-	}
-	else
-	{
-
 	}
 
 	return ret;
@@ -344,7 +333,7 @@ bool CRedisConn::_getArryToMap( redisReply* reply , ValueMap& valueMap )
 }
 
 bool CRedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
-                ValueList& valueList )
+                ValueList& valueList ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -361,11 +350,18 @@ bool CRedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
 	}
 	else
 	{
-		if ( REDIS_REPLY_ARRAY == reply->type )
+		if ( REDIS_REPLY_ARRAY == reply->type && 0 == reply->elements ) //<  key是list类型但 start > end
+		{
+			_errStr = std::string( _errDes[ERR_INDEX] ) + " or "
+			                + _errDes[ERR_LIST_EMPTY];
+			ret = false;
+
+		}
+		else
 		{
 			_getArryToList( reply, valueList );
+			ret = true;
 		}
-		ret = true;
 	}
 
 	if ( NULL != reply )
@@ -377,6 +373,7 @@ bool CRedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
 }
 
 bool CRedisConn::rpush( const std::string& key , const std::string& value , uint64_t& retval )
+                throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -407,7 +404,7 @@ bool CRedisConn::rpush( const std::string& key , const std::string& value , uint
 	return ret;
 }
 
-bool CRedisConn::rpop( const std::string& key , std::string& value )
+bool CRedisConn::rpop( const std::string& key , std::string& value ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -444,11 +441,11 @@ bool CRedisConn::rpop( const std::string& key , std::string& value )
 		freeReplyObject( reply );
 	}
 
-
 	return ret;
 }
 
 bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& value )
+                throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -468,7 +465,7 @@ bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& v
 		// 失败
 		if ( NULL == reply->str )
 		{
-			_errStr =  _errDes[ERR_NO_KEY] ;
+			_errStr = _errDes[ERR_NO_KEY];
 			value = "";
 			ret = false;
 		}
@@ -487,8 +484,8 @@ bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& v
 	return ret;
 }
 
-bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
-                const std::string& pivot , const std::string value , int64_t& retval )
+bool CRedisConn::linsert( const std::string& key , INSERT_POS position , const std::string& pivot ,
+                const std::string value , int64_t& retval ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -498,15 +495,17 @@ bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
 
 	std::string pos;
 
-	if( BEFORE == position )
+	if ( BEFORE == position )
 	{
 		pos = "BEFORE";
-	}else if( AFTER == position )
+	}
+	else if ( AFTER == position )
 	{
 		pos = "AFTER";
-	}else
+	}
+	else
 	{
-		_errStr = _errDes[ ERR_POSITION ];
+		_errStr = _errDes[ERR_POSITION];
 		return false;
 	}
 
@@ -514,7 +513,7 @@ bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
 	redisReply *reply = redisCmd( "LINSERT %s %s %s %s", key.c_str( ), pos.c_str( ),
 	                pivot.c_str( ), value.c_str( ) );
 
-	if ( _getError( reply ) )
+	if ( _getError( reply ) )	//< 不是list 类型
 	{
 		ret = false;
 	}
@@ -522,20 +521,23 @@ bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
 	{
 		if ( REDIS_REPLY_INTEGER == reply->type )
 		{
-			if( reply->integer == -1 )
+			if ( reply->integer == -1 )
 			{
-				_errStr = _errDes[ ERR_PIVOT_NO_EXIST ];
+				_errStr = _errDes[ERR_PIVOT_NO_EXIST];
 				ret = false;
-			}else if( reply->integer == 0 )
+			}
+			else if ( reply->integer == 0 )
 			{
-				_errStr = _errDes[ ERR_LIST_EMPTY ];
+				_errStr = _errDes[ERR_LIST_EMPTY];
 				ret = false;
-			}else
+			}
+			else
 			{
 				retval = reply->integer;
 				ret = true;
 			}
-		}else
+		}
+		else
 		{
 			ret = false;
 		}
@@ -549,7 +551,7 @@ bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
 	return ret;
 }
 
-bool CRedisConn::llen( const std::string& key , uint64_t& retval )
+bool CRedisConn::llen( const std::string& key , uint64_t& retval ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -566,11 +568,16 @@ bool CRedisConn::llen( const std::string& key , uint64_t& retval )
 	}
 	else
 	{
-		if ( REDIS_REPLY_INTEGER == reply->type )
+		if ( REDIS_REPLY_INTEGER == reply->type && ( 0 == reply->integer ) )
+		{
+			_errStr = _errDes[ERR_LIST_EMPTY];
+			return false;
+		}
+		else
 		{
 			retval = reply->integer;
+			ret = true;
 		}
-		ret = true;
 	}
 
 	if ( NULL != reply )
@@ -583,6 +590,7 @@ bool CRedisConn::llen( const std::string& key , uint64_t& retval )
 
 //////////////////hash方法/////////////////////////////
 bool CRedisConn::hget( const std::string& key , const std::string& filed , std::string& value )
+                throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -608,12 +616,11 @@ bool CRedisConn::hget( const std::string& key , const std::string& filed , std::
 		freeReplyObject( reply );
 	}
 
-
 	return ret;
 }
 
-bool CRedisConn::hset( const std::string& key , const std::string& filed , const std::string& value ,
-                uint32_t& retval )
+bool CRedisConn::hset( const std::string& key , const std::string& filed ,
+                const std::string& value , uint32_t& retval ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -645,6 +652,7 @@ bool CRedisConn::hset( const std::string& key , const std::string& filed , const
 }
 
 bool CRedisConn::hdel( const std::string& key , const std::string& filed , uint32_t& retval )
+                throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -673,7 +681,7 @@ bool CRedisConn::hdel( const std::string& key , const std::string& filed , uint3
 	return ret;
 }
 
-bool CRedisConn::hgetall( const std::string& key , ValueMap& valueMap )
+bool CRedisConn::hgetall( const std::string& key , ValueMap& valueMap ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
