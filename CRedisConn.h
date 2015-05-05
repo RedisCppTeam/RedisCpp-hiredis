@@ -193,7 +193,7 @@ public:
 	 * @warning 获取失败 value为""(string初始化默认值)
 	 */
 	bool hget(const std::string& key, const std::string& filed,
-			std::string& value);
+			std::string& value) throw (NullReplyException);
 
 	/**
 	 * @brief设置哈希表中以key和field所对应的value值
@@ -205,7 +205,8 @@ public:
 	 * @warning 设置失败 retval为0，成功为1
 	 */
 	bool hset(const std::string& key, const std::string& filed,
-			const std::string& value, uint32_t& retval);
+			const std::string& value, uint32_t& retval)
+					throw (NullReplyException);
 
 	/**
 	 * @brief删除哈希表中key所对应的field这一项内容
@@ -216,7 +217,7 @@ public:
 	 *@warning 删除失败 retval为0，成功为1
 	 */
 	bool hdel(const std::string& key, const std::string& filed,
-			uint32_t& retval);
+			uint32_t& retval) throw (NullReplyException);
 
 	/**
 	 * @brief取得哈希表中key所对应的所有内容
@@ -225,7 +226,8 @@ public:
 	 * @return true 成功获取，false获取失败
 	 * @warning 获取失败 valueMap为空
 	 */
-	bool hgetall(const std::string& key, ValueMap& valueMap);
+	bool hgetall(const std::string& key, ValueMap& valueMap)
+			throw (NullReplyException);
 
 protected:
 	/**
