@@ -12,7 +12,6 @@
  * 修订说明:初始版本
  */
 
-#include <string.h>
 #include "CRedisConn.h"
 
 namespace RedisCpp
@@ -56,7 +55,7 @@ bool CRedisConn::_getError( const redisReply* reply )
 	if ( reply == NULL )
 	{
 		_errStr = _errDes[ ERR_NULL ];
-		return false;
+		throw NullReplyException();
 	}
 	// have error
 	if ( reply->type == REDIS_REPLY_ERROR )
@@ -88,6 +87,8 @@ bool CRedisConn::_getError( const redisContext* redCtx )
 		return false;
 	}
 }
+
+
 
 bool CRedisConn::auth( const std::string& password )
 {
@@ -227,6 +228,7 @@ CRedisConn::~CRedisConn( )
 ////////////////////////////////// list 类的方法 ////////////////////////////////////////
 
 bool CRedisConn::lpush( const std::string& key , const std::string& value , uint64_t& retval )
+                throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -253,11 +255,11 @@ bool CRedisConn::lpush( const std::string& key , const std::string& value , uint
 	{
 		freeReplyObject( reply );
 	}
-
 	return ret;
+
 }
 
-bool CRedisConn::lpop( const std::string& key , std::string& value )
+bool CRedisConn::lpop( const std::string& key , std::string& value )  throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -343,7 +345,7 @@ bool CRedisConn::_getArryToMap( redisReply* reply , ValueMap& valueMap )
 }
 
 bool CRedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
-                ValueList& valueList )
+                ValueList& valueList )  throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -382,6 +384,7 @@ bool CRedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
 }
 
 bool CRedisConn::rpush( const std::string& key , const std::string& value , uint64_t& retval )
+		throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -412,7 +415,7 @@ bool CRedisConn::rpush( const std::string& key , const std::string& value , uint
 	return ret;
 }
 
-bool CRedisConn::rpop( const std::string& key , std::string& value )
+bool CRedisConn::rpop( const std::string& key , std::string& value )   throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -448,15 +451,13 @@ bool CRedisConn::rpop( const std::string& key , std::string& value )
 	{
 		freeReplyObject( reply );
 	}
-	else
-	{
 
-	}
 
 	return ret;
 }
 
 bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& value )
+		throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -473,6 +474,7 @@ bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& v
 	}
 	else
 	{
+
 		if ( NULL == reply->str )
 		{
 			_errStr = std::string( _errDes[ERR_NO_KEY] ) + " or "
@@ -496,7 +498,7 @@ bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& v
 }
 
 bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
-                const std::string& pivot , const std::string value , int64_t& retval )
+                const std::string& pivot , const std::string value , int64_t& retval )  throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -557,11 +559,8 @@ bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
 	return ret;
 }
 
-/**
- * key不存在解释为空列表
- * 不是列表类型解释同redis默认
- */
-bool CRedisConn::llen( const std::string& key , uint64_t& retval )
+
+bool CRedisConn::llen( const std::string& key , uint64_t& retval )   throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -594,10 +593,6 @@ bool CRedisConn::llen( const std::string& key , uint64_t& retval )
 	{
 		freeReplyObject( reply );
 	}
-	else
-	{
-
-	}
 
 	return ret;
 }
@@ -628,10 +623,7 @@ bool CRedisConn::hget( const std::string& key , const std::string& filed , std::
 	{
 		freeReplyObject( reply );
 	}
-	else
-	{
 
-	}
 
 	return ret;
 }
@@ -663,10 +655,6 @@ bool CRedisConn::hset( const std::string& key , const std::string& filed , const
 	{
 		freeReplyObject( reply );
 	}
-	else
-	{
-
-	}
 
 	return ret;
 
@@ -696,10 +684,6 @@ bool CRedisConn::hdel( const std::string& key , const std::string& filed , uint3
 	if ( NULL != reply )
 	{
 		freeReplyObject( reply );
-	}
-	else
-	{
-
 	}
 
 	return ret;
@@ -732,10 +716,6 @@ bool CRedisConn::hgetall( const std::string& key , ValueMap& valueMap )
 	if ( NULL != reply )
 	{
 		freeReplyObject( reply );
-	}
-	else
-	{
-
 	}
 
 	return ret;

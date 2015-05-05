@@ -12,6 +12,7 @@
  * 修订说明:初始版本
  */
 #include "CRedisConn.h"
+#include <unistd.h>
 
 using RedisCpp::BEFORE;
 using RedisCpp::AFTER;
@@ -117,11 +118,6 @@ void TestList( )
 	{
 		std::cout<<value.c_str()<<std::endl;
 	}
-
-
-
-
-
 
 }
 
