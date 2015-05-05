@@ -150,26 +150,63 @@ public:
 	 *
 	 * ＠param [in] format 格式化子复制。
 	 * ＠param [in] ... 指令及数据字符串。
-	 * @return NULL ,redis 执行失败，或者断开俩就。橙光返回　redisReply 指针。
+	 * @return NULL ,redis 执行失败，或者断开连接。成功返回　redisReply 指针。
 	 */
 	redisReply*  redisCmd( const char *format, ... );
 
+
 	///////////////////////////////// list 的方法 /////////////////////////////////////
+	/**
+	 * @brief 从list左边插入一个元素
+	 * @param [in] retval 插入成功后list长度
+	 * @return false插入失败，true插入成功
+	 */
 	bool lpush(const std::string& key, const std::string& value, uint64_t& retval );
 
+	/**
+	 * @brief 从list左边弹出一个元素
+	 * @param [in] value 弹出的元素值
+	 * @return false弹出失败，true弹出成功
+	 */
 	bool lpop(const std::string& key, std::string& value );
 
-	bool lrange( const std::string &key, uint32_t start, int32_t end, ValueList& valueList );
+	/**
+	 * @brief 获取list指定区间内的元素
+	 * @param [in] start 区间开始下标，stop 区间结束下标, valueList区间list
+	 */
+	bool lrange( const std::string &key, uint32_t start, int32_t stop, ValueList& valueList );
 
+	/**
+	 * @brief 从list右边插入一个元素
+	 * @param [in] retval 插入成功后list长度
+	 * @return false插入失败，true插入成功
+	 */
 	bool rpush( const std::string& key , const std::string& value , uint64_t& retval );
 
+	/**
+	 * @brief 从list右边弹出一个元素
+	 * @param [in] value 弹出的元素值
+	 * @return false弹出失败，true弹出成功
+	 */
 	bool rpop( const std::string& key , std::string& value );
 
+	/**
+	 * @brief 健值为key的list中插入一个元素
+	 * @param [in] position:BEFORE左边插入，AFTER右边插入；value:插入值；retval：插入后list长度
+	 */
 	bool linsert( const std::string& key , INSERT_POS position ,
 	                const std::string& pivot , const std::string value , int64_t& retval );
 
+	/**
+	 * @brief 获取元素下标为index的值
+	 *
+	 */
 	bool lindex( const std::string& key , int32_t index , std::string& value );
 
+	/**
+	 * @brief 获取list长度
+	 * @param [in] retval 获取到的长度
+	 */
 	bool llen( const std::string& key , uint64_t& retval );
 
 	//////////////////////////////   hash 的方法 //////////////////////////////////////
@@ -231,6 +268,7 @@ private:
 		ERR_PIVOT_NO_EXIST,
 		ERR_LIST_EMPTY,
 		ERR_NO_KEY,
+		ERR_INDEX,
 		ERR_BOTTOM
 	};
 	std::string _errStr;		///< Describe the reason for error..

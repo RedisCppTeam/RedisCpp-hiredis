@@ -24,9 +24,10 @@ const char* CRedisConn::_errDes[ERR_BOTTOM] =
 		"NULL pointer , fatal error!",
 		"Has no connection to the redis server.",
 		"Insert into list error ,position must BEFORE or AFTER.",
-		"Inser Error,pivot is not found.",
+		"Insert Error,pivot is not found.",
 		"List is empty",
-		"Key not find"
+		"Key not find",
+		"Index out of range"
 };
 
 CRedisConn::CRedisConn( )
@@ -55,7 +56,7 @@ bool CRedisConn::_getError( const redisReply* reply )
 	if ( reply == NULL )
 	{
 		_errStr = _errDes[ ERR_NULL ];
-		return true;
+		return false;
 	}
 	// have error
 	if ( reply->type == REDIS_REPLY_ERROR )
@@ -273,10 +274,10 @@ bool CRedisConn::lpop( const std::string& key , std::string& value )
 	}
 	else
 	{
-		// 失败
+		//key 不存在
 		if ( NULL == reply->str )
 		{
-			_errStr = std::string( _errDes[ERR_NO_KEY] ) + " or " + _errDes[ERR_LIST_EMPTY];
+			_errStr = std::string( _errDes[ERR_NO_KEY] ) ;//+ " or " + _errDes[ERR_LIST_EMPTY];
 			value = "";
 			ret = false;
 		}
@@ -353,26 +354,28 @@ bool CRedisConn::lrange( const std::string &key , uint32_t start , int32_t end ,
 	bool ret = false;
 	redisReply *reply = redisCmd( "LRANGE %s %d %d", key.c_str( ), start, end );
 
-	if ( _getError( reply ) )
+	if ( _getError( reply ) )	//< key 存在但不是list类型
 	{
 		ret = false;
 	}
 	else
 	{
-		if ( REDIS_REPLY_ARRAY == reply->type )
+		if ( REDIS_REPLY_ARRAY == reply->type && 0 == reply->elements) 		//<  key是list类型但 start > end
+		{
+			_errStr = std::string( _errDes[ERR_INDEX] ) + " or " + _errDes[ERR_LIST_EMPTY];
+			ret = false;
+
+		}
+		else
 		{
 			_getArryToList( reply, valueList );
+			ret = true;
 		}
-		ret = true;
 	}
 
 	if ( NULL != reply )
 	{
 		freeReplyObject( reply );
-	}
-	else
-	{
-
 	}
 
 	return ret;
@@ -470,17 +473,23 @@ bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& v
 	}
 	else
 	{
-		value = reply->str;
-		ret = true;
+		if ( NULL == reply->str )
+		{
+			_errStr = std::string( _errDes[ERR_NO_KEY] ) + " or "
+			                + _errDes[ERR_INDEX];
+			value = "";
+			ret = false;
+		}
+		else
+		{
+			value = reply->str;
+			ret = true;
+		}
 	}
 
 	if ( NULL != reply )
 	{
 		freeReplyObject( reply );
-	}
-	else
-	{
-
 	}
 
 	return ret;
@@ -513,7 +522,7 @@ bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
 	redisReply *reply = redisCmd( "LINSERT %s %s %s %s", key.c_str( ), pos.c_str( ),
 	                pivot.c_str( ), value.c_str( ) );
 
-	if ( _getError( reply ) )
+	if ( _getError( reply ) )	//< 不是list 类型
 	{
 		ret = false;
 	}
@@ -548,6 +557,10 @@ bool CRedisConn::linsert( const std::string& key , INSERT_POS position ,
 	return ret;
 }
 
+/**
+ * key不存在解释为空列表
+ * 不是列表类型解释同redis默认
+ */
 bool CRedisConn::llen( const std::string& key , uint64_t& retval )
 {
 	if ( !_connected || !_redCtx )
@@ -565,11 +578,16 @@ bool CRedisConn::llen( const std::string& key , uint64_t& retval )
 	}
 	else
 	{
-		if ( REDIS_REPLY_INTEGER == reply->type )
+		if ( REDIS_REPLY_INTEGER == reply->type && ( 0 == reply->integer))
+		{
+			_errStr = _errDes[ ERR_LIST_EMPTY ];
+			return false;
+		}
+		else
 		{
 			retval = reply->integer;
+			ret = true;
 		}
-		ret = true;
 	}
 
 	if ( NULL != reply )
