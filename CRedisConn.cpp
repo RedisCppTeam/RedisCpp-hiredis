@@ -49,7 +49,7 @@ void CRedisConn::init( const std::string &host , const uint16_t port , const std
 	_timeout = timeout;
 }
 
-bool CRedisConn::_getError( const redisReply* reply )
+bool CRedisConn::_getError( const redisReply* reply )  throw ( NullReplyException )
 {
 	_errStr = _errDes[ERR_NO_ERROR];
 	if ( reply == NULL )
@@ -69,7 +69,7 @@ bool CRedisConn::_getError( const redisReply* reply )
 	}
 }
 
-bool CRedisConn::_getError( const redisContext* redCtx ) throw ( NullReplyException )
+bool CRedisConn::_getError( const redisContext* redCtx )
 {
 	_errStr = _errDes[ERR_NO_ERROR];
 	if ( redCtx == NULL )
@@ -136,6 +136,7 @@ bool CRedisConn::connect( void )
 			redisFree( _redCtx );
 			_redCtx = NULL;
 		}
+		_connected = false;
 		return false;
 	}
 

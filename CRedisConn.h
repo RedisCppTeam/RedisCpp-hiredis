@@ -111,7 +111,7 @@ public:
 	 *@param [in] 登录的密码。
 	 *@return 成功返回　true, 失败返回　false.
 	 */
-	bool auth( const std::string& password );
+	bool auth( const std::string& password )  throw ( NullReplyException );
 
 	/**
 	 *@brief 初始化链接信息并且链接。
@@ -290,9 +290,9 @@ protected:
 	 */
 	bool _getArryToMap( redisReply* reply , ValueMap& valueMap );
 
-	bool _getError( const redisContext* redCtx ) throw ( NullReplyException );
+	bool _getError( const redisContext* redCtx );
 
-	bool _getError( const redisReply* reply );
+	bool _getError( const redisReply* reply )  throw ( NullReplyException );
 
 	inline redisContext* _getCtx( ) const
 	{
