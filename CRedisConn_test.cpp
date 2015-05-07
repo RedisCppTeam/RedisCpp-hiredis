@@ -14,14 +14,14 @@
 #include "CRedisConn.h"
 #include <unistd.h>
 
-using RedisCpp::BEFORE;
-using RedisCpp::AFTER;
+using  RedisCpp::CRedisConn;
 
 void TestList( )
 {
+
 	int64_t ret = 0;
 	uint64_t ret2 = 0;
-	RedisCpp::CRedisConn con;
+	CRedisConn con;
 	if ( !con.connect( "127.0.0.1", 6379 ) )
 	{
 		std::cout << "connect error " << con.getErrorStr( ) << std::endl;
@@ -122,9 +122,10 @@ void TestList( )
 
 void TestHash( void )
 {
+
 	int64_t ret = 0;
 	uint64_t ret2 = 0;
-	RedisCpp::CRedisConn con;
+	CRedisConn con;
 	if ( !con.connect( "127.0.0.1", 6379 ) )
 	{
 		std::cout << "connect error " << con.getErrorStr( ) << std::endl;

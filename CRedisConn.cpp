@@ -88,7 +88,7 @@ bool CRedisConn::_getError( const redisContext* redCtx )
 	}
 }
 
-bool CRedisConn::auth( const std::string& password )
+bool CRedisConn::auth( const std::string& password )  throw ( NullReplyException )
 {
 	if ( !_connected )
 	{
