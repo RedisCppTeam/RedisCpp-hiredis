@@ -242,7 +242,7 @@ public:
 	 * @param [in] key 是键名，相当于表名
 	 * @param [in] filed 是字段名
 	 * @param [in] value 是以上两参数对应的值
-	 * @param [out] retval 获取的值
+	 * @param [out] retval 0:field已存在且覆盖了value ； 1： field不存在，新建field且成功设置了value
 	 * @return true 成功获取，false获取失败
 	 * @warning 设置失败 retval为0，成功为1
 	 */
@@ -253,7 +253,7 @@ public:
 	 * @brief删除哈希表中key所对应的field这一项内容
 	 * @param [in] key 是键名，相当于表名
 	 * @param [in] filed 是字段名
-	 * @param [out] retval 获取的值
+	 * @param [out] retval：删除的field个数
 	 * @return true 成功获取，false获取失败
 	 *@warning 删除失败 retval为0，成功为1
 	 */
@@ -316,10 +316,9 @@ private:
 		ERR_NO_ERROR = 0,
 		ERR_NULL,
 		ERR_NO_CONNECT,
-		ERR_POSITION,
-		ERR_PIVOT_NO_EXIST,
-		ERR_LIST_EMPTY,
+		ERR_NO_PIVOT,
 		ERR_NO_KEY,
+		ERR_NO_FIELD,
 		ERR_INDEX,
 		ERR_BOTTOM
 	};

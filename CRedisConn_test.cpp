@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 using  RedisCpp::CRedisConn;
+using  RedisCpp::INSERT_POS;
 
 void TestList( )
 {
@@ -29,7 +30,7 @@ void TestList( )
 	}
 
 	std::string value;
-/*
+
 	//< key 不是list类型
 	if ( !con.lpush( "test", "yuhaiyang", ret2 ) )
 	{
@@ -81,7 +82,7 @@ void TestList( )
 	}
 
 	//< key 不存在；key 不是list类型; position 错误; pivot 不存在
-	if( !con.linsert("Ltest",AFTER, "value0", "chenjun", ret ) )
+	if( !con.linsert("Ltest", RedisCpp::BEFORE, "value0", "chenjun", ret ) )
 	{
 		std::cout << "linsert error: " << con.getErrorStr( ) << std::endl;
 	}
@@ -107,7 +108,7 @@ void TestList( )
 		}
 	}
 
-*/
+
 	//key 不存在;  key 不是list类型; index不在范围内
 	if( !con.lindex("test",1,value) )
 	{
@@ -125,6 +126,8 @@ void TestHash( void )
 
 	int64_t ret = 0;
 	uint64_t ret2 = 0;
+	uint32_t ret3;
+	RedisCpp::ValueMap valueMap;
 	CRedisConn con;
 	if ( !con.connect( "127.0.0.1", 6379 ) )
 	{
@@ -133,17 +136,67 @@ void TestHash( void )
 	}
 
 	std::string value;
-	if ( !con.hget( "newHash", "yuhaiyang", value ) )
+
+	//<  key不是hash类型； key不存在； field不存在；正常情况
+	if ( !con.hget( "carC", "color", value ) )
 	{
-		std::cout << "hget error " << con.getErrorStr( ) << std::endl;
+		std::cout<<"___"<<std::endl;
+		std::cout << "hget error: " << con.getErrorStr( ) << std::endl;
+	}
+	else
+	{
+		std::cout << "hash value = " << value.c_str() << std::endl;
 	}
 
+	//<  key 不存在；key 不是hash类型；field 不存在； field 已存在
+
+	if ( !con.hset( "test", "colddddr", "bue", ret3 ) )
+	{
+		std::cout << "hget error: " << con.getErrorStr( ) << std::endl;
+	}
+	else
+	{
+		if ( ret3 == 1)
+		{
+			std::cout << "ret = 1; set a new value " << std::endl;
+		}
+		else if(ret3 == 0)
+		{
+			std::cout << "ret = 0; recovered value " << std::endl;
+		}
+	}
+
+
+	//< key不存在； key不是hash类型； field不存在； field存在
+	if ( !con.hdel( "car", "color",ret3 ) )
+	{
+		std::cout << "hdel error: " << con.getErrorStr() << std::endl;
+	}
+	else
+	{
+		std::cout << "ret3 = " << ret3 << std::endl;
+	}
+
+	//< key 不存在； key不是hash类型； key是hash类型
+	RedisCpp::ValueMap::iterator it;
+
+	if ( !con.hgetall( "bike", valueMap ) )
+	{
+		std::cout << "hgetall error: " << con.getErrorStr() << std::endl;
+	}
+	else
+	{
+		std::cout << "hgetall :" << std::endl;
+		for(it=valueMap.begin();it!=valueMap.end();++it)
+	        std::cout<<"field: "<<it->first <<" value: "<<it->second<<std::endl;
+	}
 }
 
 
 int main( )
 {
 	TestList();
+	TestHash();
 	return 0;
 }
 
