@@ -209,7 +209,7 @@ public:
 	 * @param [in] position:BEFORE左边插入，AFTER右边插入；value:插入值；retval：插入后list长度
 	 */
 	bool linsert( const std::string& key , INSERT_POS position , const std::string& pivot ,
-	                const std::string value , int64_t& retval ) throw ( NullReplyException );
+	                const std::string& value , int64_t& retval ) throw ( NullReplyException );
 
 	/**
 	 * @brief 获取元素下标为index的值
@@ -246,8 +246,8 @@ public:
 	 * @return true 成功获取，false获取失败
 	 * @warning 设置失败 retval为0，成功为1
 	 */
-	bool hset( const std::string& key , const std::string& filed , const std::string& value ,
-	                uint32_t& retval ) throw ( NullReplyException );
+	bool hset( const std::string& key , const std::string& filed , const std::string& value )
+	                throw ( NullReplyException );
 
 	/**
 	 * @brief删除哈希表中key所对应的field这一项内容

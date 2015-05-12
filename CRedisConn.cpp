@@ -491,7 +491,7 @@ bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& v
 }
 
 bool CRedisConn::linsert( const std::string& key , INSERT_POS position , const std::string& pivot ,
-                const std::string value , int64_t& retval ) throw ( NullReplyException )
+                const std::string& value , int64_t& retval ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -633,7 +633,7 @@ bool CRedisConn::hget( const std::string& key , const std::string& filed , std::
 }
 
 bool CRedisConn::hset( const std::string& key , const std::string& filed ,
-                const std::string& value , uint32_t& retval ) throw ( NullReplyException )
+                const std::string& value  ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -651,7 +651,6 @@ bool CRedisConn::hset( const std::string& key , const std::string& filed ,
 	}
 	else
 	{
-		retval = reply->integer;
 		ret = true;
 	}
 
