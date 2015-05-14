@@ -23,7 +23,6 @@
 #include <map>
 #include <stdexcept>
 
-#define DEBUGOUT( attr, value ) std::cout << attr << value << std::endl;
 
 #ifndef DISALLOW_COPY_AND_ASSIGN
 #define DISALLOW_COPY_AND_ASSIGN( typeName )	\
@@ -246,8 +245,8 @@ public:
 	 * @return true 成功获取，false获取失败
 	 * @warning 设置失败 retval为0，成功为1
 	 */
-	bool hset( const std::string& key , const std::string& filed , const std::string& value )
-	                throw ( NullReplyException );
+	bool hset( const std::string& key , const std::string& filed , const std::string& value ,
+	                uint32_t& retval ) throw ( NullReplyException );
 
 	/**
 	 * @brief删除哈希表中key所对应的field这一项内容

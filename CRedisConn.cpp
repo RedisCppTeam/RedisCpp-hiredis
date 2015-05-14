@@ -21,7 +21,7 @@ const char* CRedisConn::_errDes[ERR_BOTTOM] =
 {
 		"No error.",
 		"NULL pointer ",
-		"Has no connection to the redis server.",
+		"No connection to the redis server.",
                 "Inser Error,pivot not found.",
                 "key not found",
 		"hash field not found",
@@ -39,7 +39,7 @@ CRedisConn::CRedisConn( )
 	_errStr = _errDes[ERR_NO_ERROR];
 }
 
-void CRedisConn::init( const std::string &host , const uint16_t port , const std::string& password ,
+void CRedisConn::init( const std::string& host , const uint16_t port , const std::string& password ,
                 const uint32_t timeout )
 {
 	_host = host;
@@ -140,16 +140,19 @@ bool CRedisConn::connect( void )
 	}
 
 	_connected = true;
+	return true;
 
 	// if connection  need password
+/*
 	if ( _password == "" )
 	{
 		return true;
 	}
 	else
 	{
-		return ( auth( _password ) );
+		return ( auth( _password ) );   //< 授权失败也将返回false
 	}
+*/
 }
 
 void CRedisConn::disConnect( )
@@ -430,8 +433,7 @@ bool CRedisConn::rpop( const std::string& key , std::string& value ) throw ( Nul
 		// 失败
 		if ( NULL == reply->str )
 		{
-			_errStr = std::string( _errDes[ERR_NO_KEY] ) + " or "
-			                + _errDes[ERR_NO_KEY];
+			_errStr =  _errDes[ERR_NO_KEY];
 			value = "";
 			ret = false;
 		}
@@ -469,9 +471,10 @@ bool CRedisConn::lindex( const std::string& key , int32_t index , std::string& v
 	else
 	{
 		// 失败
-		if ( NULL == reply->str )
+		if ( REDIS_REPLY_NIL == reply->type )
 		{
-			_errStr = _errDes[ERR_NO_KEY];
+			_errStr = std::string( _errDes[ERR_NO_KEY] ) + " or " +
+					_errDes[ERR_INDEX];
 			value = "";
 			ret = false;
 		}
@@ -572,7 +575,7 @@ bool CRedisConn::llen( const std::string& key , uint64_t& retval ) throw ( NullR
 		if ( REDIS_REPLY_INTEGER == reply->type && ( 0 == reply->integer ) )
 		{
 			_errStr = _errDes[ERR_NO_KEY];
-			return false;
+			ret = false;
 		}
 		else
 		{
@@ -633,7 +636,7 @@ bool CRedisConn::hget( const std::string& key , const std::string& filed , std::
 }
 
 bool CRedisConn::hset( const std::string& key , const std::string& filed ,
-                const std::string& value  ) throw ( NullReplyException )
+                const std::string& value , uint32_t& retval ) throw ( NullReplyException )
 {
 	if ( !_connected || !_redCtx )
 	{
@@ -651,6 +654,7 @@ bool CRedisConn::hset( const std::string& key , const std::string& filed ,
 	}
 	else
 	{
+		retval = reply->integer;
 		ret = true;
 	}
 
